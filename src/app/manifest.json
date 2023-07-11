@@ -5,6 +5,7 @@
     "description": "A simple CLI application that outputs 'Hello, World!'",
     "requires": [
         "window",
-        "utils"
+        "utils",
+        "gfx"
     ]
 }

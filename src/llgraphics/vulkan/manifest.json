@@ -1,0 +1,14 @@
+{
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+    "type": "lib",
+    "id": "low-level-graphics-vulkan",
+    "description": "Vulkan API interection",
+    
+    "requires": [
+      "utils",
+      "window"
+    ],
+    "provides": [
+      "gfx"
+    ]
+  }
