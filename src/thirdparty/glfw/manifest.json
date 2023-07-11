@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+    "id": "glfw",
+    "type": "lib",
+    "description": "A cross-platform development library designed to provide low level access to window",
+    "tools": {
+        "cc": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "glfw3"
+            ]
+        },
+        "cxx": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "glfw3"
+            ]
+        },
+        "ld": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--libs",
+                "glfw3"
+            ]
+        }
+    }
+}

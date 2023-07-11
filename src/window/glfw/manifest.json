@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+  "type": "lib",
+  "id": "window-glfw",
+  "description": "A glfw window implementation",
+  
+  "requires": [
+    "utils",
+    "glfw"
+  ],
+  "provides": [
+    "window"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+    "type": "exe",
+    "id": "hello-world",
+    "description": "A simple CLI application that outputs 'Hello, World!'",
+    "requires": [
+        "window",
+        "utils"
+    ]
+}
