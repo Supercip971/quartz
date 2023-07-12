@@ -72,27 +72,26 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerCallback(
 
     return VK_FALSE;
 }
-vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreationInfo(){
+vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreationInfo() {
 
-	return	
-        vk::DebugUtilsMessengerCreateInfoEXT(
-				{},
-				vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose,
-				vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-            validationLayerCallback,
-            nullptr);
+    return vk::DebugUtilsMessengerCreateInfoEXT(
+        {},
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose,
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+        validationLayerCallback,
+        nullptr);
 }
 
-extern "C" VkResult vkCreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+extern "C" VkResult vkCreateDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerCreateInfoEXT const *pCreateInfo, VkAllocationCallbacks const *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger) {
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr) {
         return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
     } else {
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
-extern "C" void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+extern "C" void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, VkAllocationCallbacks const *pAllocator) {
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr) {
         func(instance, debugMessenger, pAllocator);
     }
@@ -100,22 +99,20 @@ extern "C" void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtil
 
 Result<> VkGfx::setupDebugMessanger() {
 
-	if (!enableValidationLayers) {
-		return {};
-	}
+    if (!enableValidationLayers) {
+        return {};
+    }
 
-	debug$("setting up debug messenger");
+    debug$("setting up debug messenger");
 
-	auto createInfo = debugMessengerCreationInfo();
+    auto createInfo = debugMessengerCreationInfo();
 
     vkTry$(instance.createDebugUtilsMessengerEXT(&createInfo, nullptr, &debugMessenger));
 
-
-
-	this->deinit_funcs.push_back([](VkGfx *gfx) {
-		debug$("destroying debug messenger");
-		gfx->instance.destroyDebugUtilsMessengerEXT(gfx->debugMessenger);
-	});
+    this->deinit_funcs.push_back([](VkGfx *gfx) {
+        debug$("destroying debug messenger");
+        gfx->instance.destroyDebugUtilsMessengerEXT(gfx->debugMessenger);
+    });
 
     return {};
 }

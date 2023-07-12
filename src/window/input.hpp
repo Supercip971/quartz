@@ -2,22 +2,18 @@
 
 #include <functional>
 #include <stdint.h>
-namespace plt
-{
+namespace plt {
 
-enum WindowCallbackType : uint64_t
-{
+enum WindowCallbackType : uint64_t {
     WINDOW_CALLBACK_NONE = (0),
     WINDOW_CALLBACK_RESIZE = (1 << 0),
     WINDOW_CALLBACK_KEY_PRESS = (1 << 1),
     WINDOW_CALLBACK_MOUSE_MOVE = (1 << 2),
 };
 
-struct WindowCallback
-{
+struct WindowCallback {
     WindowCallbackType type; // only 1 bit in this bitfield can be set in this structure
-    union
-    {
+    union {
         struct
         {
             int key;

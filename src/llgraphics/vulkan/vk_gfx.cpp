@@ -17,15 +17,13 @@ Result<> VkGfx::setupVulkan() {
 }
 
 Result<> VkGfx::attachVulkan(Window *window) {
-	info$("attaching vulkan to window");
+    info$("attaching vulkan to window");
 
-	(void)window;
-	try$(pickPhysicalDevice());
-	try$(setupLogicalDevice());
+    (void)window;
+    try$(pickPhysicalDevice());
+    try$(setupLogicalDevice());
 
-
-	return {};
-
+    return {};
 };
 
 }; // namespace plt

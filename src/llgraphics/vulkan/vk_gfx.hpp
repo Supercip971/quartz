@@ -1,11 +1,12 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+
 #include <vulkan/vulkan_handles.hpp>
 
 #include "llgraphics/gfx.hpp"
-#include "utils/traits.hpp"
 #include "llgraphics/vulkan/device/physical.hpp"
+#include "utils/traits.hpp"
 
 namespace plt {
 
@@ -13,22 +14,17 @@ class VkGfx : public NoCopy, public Gfx {
 
 public:
     Result<> setupVulkan();
-	Result<> attachVulkan(Window *window);
+    Result<> attachVulkan(Window *window);
 
     Result<> createInstance();
 
     Result<> setupDebugMessanger();
 
-	Result<> pickPhysicalDevice();
+    Result<> pickPhysicalDevice();
 
     Result<> setupLogicalDevice();
 
-
-	QueueFamilyIndices findPhysicalDeviceQueueFamily();
-
-
-
-
+    QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
     void vulkanDeinit() {
 
@@ -41,21 +37,18 @@ public:
         info$("vulkan deinitilized");
     }
 
-
-	
 private:
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;
 
-
-	/* in instance */
+    /* in instance */
     vk::Instance instance;
-	vk::DebugUtilsMessengerEXT debugMessenger;
+    vk::DebugUtilsMessengerEXT debugMessenger;
 
-	/* in device */
-	vk::PhysicalDevice physicalDevice;
-	vk::Device LogicalDevice; 
+    /* in device */
+    vk::PhysicalDevice physicalDevice;
+    vk::Device LogicalDevice;
 
-	vk::Queue graphicsQueue;
+    vk::Queue graphicsQueue;
 };
 
 [[maybe_unused]] static inline Result<> vkTry(vk::Result res) {

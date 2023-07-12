@@ -3,39 +3,35 @@
 #include <vulkan/vulkan_structs.hpp>
 namespace plt {
 
+Result<> VkGfx::setupLogicalDevice() {
 
-	Result<> VkGfx::setupLogicalDevice()
-	{
+    debug$("creating logical device...");
 
-		debug$("creating logical device...");
+    auto queueFamilies = this->findPhysicalDeviceQueueFamily();
 
+    std::vector<float> queuePriorities = {1.0f};
+    vk::DeviceQueueCreateInfo queueCreateInfo = vk::DeviceQueueCreateInfo()
+                                                    .setQueueFamilyIndex(queueFamilies.graphicsFamily)
+                                                    .setQueueCount(1)
+                                                    .setPQueuePriorities(queuePriorities.data());
 
-		auto queueFamilies = this->findPhysicalDeviceQueueFamily();
+    vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 
-		std::vector<float> queuePriorities = {1.0f};
-		vk::DeviceQueueCreateInfo queueCreateInfo = vk::DeviceQueueCreateInfo()
-			.setQueueFamilyIndex(queueFamilies.graphicsFamily)
-			.setQueueCount(1)
-			.setPQueuePriorities(queuePriorities.data());
+    vk::DeviceCreateInfo info = vk::DeviceCreateInfo()
+                                    .setQueueCreateInfoCount(1)
+                                    .setPQueueCreateInfos(&queueCreateInfo)
+                                    .setPEnabledFeatures(&deviceFeatures);
 
-		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
+    try$(vkTry(this->physicalDevice.createDevice(&info, nullptr, &this->LogicalDevice)));
 
-		vk::DeviceCreateInfo info = vk::DeviceCreateInfo()
-			.setQueueCreateInfoCount(1)
-			.setPQueueCreateInfos(&queueCreateInfo)
-			.setPEnabledFeatures(&deviceFeatures); 
+    debug$("created logical device");
 
-		try$(vkTry(this->physicalDevice.createDevice(&info, nullptr, &this->LogicalDevice)));
+    this->deinit_funcs.push_back([](VkGfx *gfx) {
+        debug$("destroying logical device");
+        gfx->LogicalDevice.destroy();
+    });
 
-
-		debug$("created logical device");
-
-		this->deinit_funcs.push_back([](VkGfx *gfx) {
-			debug$("destroying logical device");
-			gfx->LogicalDevice.destroy();
-		});
-
-		this->graphicsQueue = this->LogicalDevice.getQueue(queueFamilies.graphicsFamily, 0);
-		return {};
-	}
+    this->graphicsQueue = this->LogicalDevice.getQueue(queueFamilies.graphicsFamily, 0);
+    return {};
 }
+} // namespace plt
