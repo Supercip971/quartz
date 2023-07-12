@@ -39,21 +39,24 @@ QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily() {
     return result;
 }
 
-QueueFamilyIndices findPhysicalDeviceQueueFamily(vk::PhysicalDevice device) {
+QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily(vk::PhysicalDevice device) {
     auto queueFamilies = device.getQueueFamilyProperties();
 
     QueueFamilyIndices result;
 
     for (uint32_t i = 0; i < queueFamilies.size(); ++i) {
         if (queueFamilies[i].queueFlags & vk::QueueFlagBits::eGraphics) {
-            result = QueueFamilyIndices(i);
+            result = result.withGraphicsFamily(i);
         }
+		if(device.getSurfaceSupportKHR(i, surface)) {
+			result = result.withPresentFamily(i);
+		}
     }
 
     return result;
 }
 
-bool isDeviceSuitable(vk::PhysicalDevice device) {
+bool VkGfx::isDeviceSuitable(vk::PhysicalDevice device) {
     // auto props = device.getProperties();
     auto features = device.getFeatures();
 

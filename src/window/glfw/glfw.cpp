@@ -1,5 +1,14 @@
-#include <GLFW/glfw3.h>
+
+
 #include <window/window.hpp>
+
+
+#define GLFW_INCLUDE_VULKAN
+#define GLFW_EXPOSE_NATIVE_X11
+#define VK_USE_PLATFORM_XLIB_KHR
+
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 namespace plt {
 
@@ -168,6 +177,27 @@ void Window::set_root() {
     glfwSetWindowSizeCallback(window_id(*this), _window_resize_callback);
     glfwSetKeyCallback(window_id(*this), _key_callback);
     glfwSetCursorPosCallback(window_id(*this), _mouse_move_callback);
+}
+
+Result<vk::SurfaceKHR> Window::create_surface(vk::Instance instance) {
+    VkSurfaceKHR surface;
+	/*
+
+    VkXlibSurfaceCreateInfoKHR createInfo = {
+        .dpy = glfwGetX11Display(),
+        .window = glfwGetX11Window(window_id(*this)),
+        .flags = 0,
+    };
+
+    if (vkCreateXlibSurfaceKHR(instance, &createInfo, nullptr, &surface) != VK_SUCCESS) {
+        return Result<vk::SurfaceKHR>::err("failed to create window surface!");
+    }*/
+
+
+	if(glfwCreateWindowSurface(instance, window_id(*this), nullptr, &surface) != VK_SUCCESS) {
+		return Result<vk::SurfaceKHR>::err("failed to create window surface!");
+	}
+    return Result<vk::SurfaceKHR>::ok(surface);
 }
 
 Result<CallbackID> Window::add_callback(WindowCallbackType callback_type, std::function<void(Window &, WindowCallback)> callback) {

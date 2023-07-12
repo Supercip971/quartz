@@ -1,7 +1,9 @@
 #pragma once
+// --
 #include <utils/result.hpp>
 #include <utils/traits.hpp>
 #include <vector>
+#include <vulkan/vulkan.hpp>
 #include <window/input.hpp>
 
 namespace plt {
@@ -53,6 +55,8 @@ public:
     static std::vector<char const *> required_extensions();
 
     void *handle() const { return _implementation_id; };
+
+    Result<vk::SurfaceKHR> create_surface(vk::Instance instance);
 
 private:
     Window(void *id) : _implementation_id(id) {}

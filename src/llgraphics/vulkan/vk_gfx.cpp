@@ -19,7 +19,8 @@ Result<> VkGfx::setupVulkan() {
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
-    (void)window;
+
+	try$(setupSurface(window));
     try$(pickPhysicalDevice());
     try$(setupLogicalDevice());
 

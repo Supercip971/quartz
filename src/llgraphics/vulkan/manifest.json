@@ -12,6 +12,7 @@
     "subdirs": [
       "instance",
 	  "device",
+	  "surface",
       ""
     ],
     "provides": [

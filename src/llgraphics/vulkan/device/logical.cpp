@@ -1,6 +1,7 @@
 
 #include "llgraphics/vulkan/vk_gfx.hpp"
 #include <vulkan/vulkan_structs.hpp>
+#include <set>
 namespace plt {
 
 Result<> VkGfx::setupLogicalDevice() {
@@ -10,16 +11,27 @@ Result<> VkGfx::setupLogicalDevice() {
     auto queueFamilies = this->findPhysicalDeviceQueueFamily();
 
     std::vector<float> queuePriorities = {1.0f};
-    vk::DeviceQueueCreateInfo queueCreateInfo = vk::DeviceQueueCreateInfo()
-                                                    .setQueueFamilyIndex(queueFamilies.graphicsFamily)
-                                                    .setQueueCount(1)
-                                                    .setPQueuePriorities(queuePriorities.data());
+
+	std::set<int> uniqueQueueFamilies = {
+		queueFamilies.graphicsFamily.index,
+		queueFamilies.presentFamily.index
+	};
+
+	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+
+	for(auto idx : uniqueQueueFamilies) {
+		queueCreateInfos.push_back(vk::DeviceQueueCreateInfo()
+									.setQueueFamilyIndex(idx)
+									.setQueueCount(1)
+									.setPQueuePriorities(queuePriorities.data()));
+	}
+	
+
 
     vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 
     vk::DeviceCreateInfo info = vk::DeviceCreateInfo()
-                                    .setQueueCreateInfoCount(1)
-                                    .setPQueueCreateInfos(&queueCreateInfo)
+                                    .setQueueCreateInfos(queueCreateInfos)
                                     .setPEnabledFeatures(&deviceFeatures);
 
     try$(vkTry(this->physicalDevice.createDevice(&info, nullptr, &this->LogicalDevice)));
@@ -32,6 +44,7 @@ Result<> VkGfx::setupLogicalDevice() {
     });
 
     this->graphicsQueue = this->LogicalDevice.getQueue(queueFamilies.graphicsFamily, 0);
+	this->presentQueue = this->LogicalDevice.getQueue(queueFamilies.presentFamily, 0);
     return {};
 }
 } // namespace plt
