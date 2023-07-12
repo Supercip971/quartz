@@ -11,14 +11,14 @@ int main(void) {
     window.set_root();
 
     plt::Gfx::init().unwrap();
-    plt::Gfx::attach(window).unwrap();
+    plt::Gfx::the()->attach(window).unwrap();
 
     while (!window.should_close()) {
         window.update();
-        plt::Gfx::render().unwrap();
+        plt::Gfx::the()->render().unwrap();
     }
 
-    plt::Gfx::cleanup();
+    plt::Gfx::the()->cleanup();
     plt::Window::destroy(window);
     plt::Window::engine_cleanup();
 

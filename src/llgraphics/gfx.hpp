@@ -7,11 +7,13 @@ namespace plt {
 class Gfx {
 public:
     static Result<> init();
-    static Result<> attach(plt::Window &target);
+    Result<> attach(plt::Window &target);
 
-    static Result<> render();
+    Result<> render();
 
-    static void cleanup(void);
+    void cleanup(void);
+
+    static Gfx *the();
 };
 
 } // namespace plt

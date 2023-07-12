@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+    "id": "vulkan",
+    "type": "lib",
+    "description": "A fast and modern api to access the GPU",
+    "tools": {
+        "cc": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "vulkan"
+            ]
+        },
+        "cxx": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "vulkan"
+            ]
+        },
+        "ld": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--libs",
+                "vulkan"
+            ]
+        }
+    }
+}

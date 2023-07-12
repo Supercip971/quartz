@@ -43,7 +43,8 @@ struct Result : public NoCopy {
         return std::holds_alternative<T>(value);
     }
 
-    void assert() const {
+    void Assert() const {
+
         if (!operator bool()) {
             fatal$("unable to assert success: {}", std::get<std::string>(value));
         }

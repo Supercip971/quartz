@@ -6,7 +6,12 @@
     
     "requires": [
       "utils",
-      "window"
+      "window",
+      "vulkan"
+    ],
+    "subdirs": [
+      "instance",
+      ""
     ],
     "provides": [
       "gfx"
