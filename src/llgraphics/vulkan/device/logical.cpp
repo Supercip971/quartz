@@ -32,7 +32,8 @@ Result<> VkGfx::setupLogicalDevice() {
 
     vk::DeviceCreateInfo info = vk::DeviceCreateInfo()
                                     .setQueueCreateInfos(queueCreateInfos)
-                                    .setPEnabledFeatures(&deviceFeatures);
+                                    .setPEnabledFeatures(&deviceFeatures)
+									.setPEnabledExtensionNames(deviceExtensions);
 
     try$(vkTry(this->physicalDevice.createDevice(&info, nullptr, &this->LogicalDevice)));
 
@@ -43,8 +44,9 @@ Result<> VkGfx::setupLogicalDevice() {
         gfx->LogicalDevice.destroy();
     });
 
-    this->graphicsQueue = this->LogicalDevice.getQueue(queueFamilies.graphicsFamily, 0);
-	this->presentQueue = this->LogicalDevice.getQueue(queueFamilies.presentFamily, 0);
+    this->graphicsQueue = this->LogicalDevice.getQueue(queueFamilies.graphicsFamily.index, 0);
+	this->presentQueue = this->LogicalDevice.getQueue(queueFamilies.presentFamily.index, 0);
+	this->queueFamilyIndices = queueFamilies;
     return {};
 }
 } // namespace plt

@@ -3,6 +3,7 @@
 
 #include "llgraphics/vulkan/vk_gfx.hpp"
 
+#include <set>
 namespace plt {
 
 struct ScoredDevice {
@@ -26,17 +27,7 @@ float deviceScore(vk::PhysicalDevice device) {
 }
 
 QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily() {
-    auto queueFamilies = physicalDevice.getQueueFamilyProperties();
-
-    QueueFamilyIndices result;
-
-    for (uint32_t i = 0; i < queueFamilies.size(); ++i) {
-        if (queueFamilies[i].queueFlags & vk::QueueFlagBits::eGraphics) {
-            result = QueueFamilyIndices(i);
-        }
-    }
-
-    return result;
+   	return findPhysicalDeviceQueueFamily(this->physicalDevice); 
 }
 
 QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily(vk::PhysicalDevice device) {
@@ -56,13 +47,34 @@ QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily(vk::PhysicalDevice devic
     return result;
 }
 
+
+
+bool VkGfx::hasDeviceExtensions(vk::PhysicalDevice device)
+{
+	auto availableExtensions = device.enumerateDeviceExtensionProperties();
+
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	for(const auto& extension : availableExtensions) {
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+	return requiredExtensions.empty();
+}
+
 bool VkGfx::isDeviceSuitable(vk::PhysicalDevice device) {
     // auto props = device.getProperties();
     auto features = device.getFeatures();
 
     auto indices = findPhysicalDeviceQueueFamily(device);
 
-    return features.geometryShader && indices.isComplete();
+	bool goodSwapchain = false;
+	if(hasDeviceExtensions(device)) {
+		auto swapchainSupport = querySwapchainSupport(device);
+		goodSwapchain = !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
+	}
+
+    return features.geometryShader && indices.isComplete() && hasDeviceExtensions(device) && goodSwapchain;
 }
 
 Result<> VkGfx::pickPhysicalDevice() {

@@ -23,6 +23,7 @@ Result<> VkGfx::attachVulkan(Window *window) {
 	try$(setupSurface(window));
     try$(pickPhysicalDevice());
     try$(setupLogicalDevice());
+	try$(setupSwapchain(window));
 
     return {};
 };

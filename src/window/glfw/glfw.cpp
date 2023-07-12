@@ -232,4 +232,23 @@ std::vector<char const *> Window::required_extensions() {
     }
     return ext;
 }
+Result<int> Window::fb_width()
+{
+	int _width;
+	int _height;
+
+	glfwGetFramebufferSize(window_id(*this), &_width, &_height);
+	return Result<int>::ok(_width);
+
+}
+
+Result<int> Window::fb_height()
+{
+	int _width;
+	int _height;
+
+	glfwGetFramebufferSize(window_id(*this), &_width, &_height);
+	return Result<int>::ok(_height);
+}
+
 } // namespace plt
