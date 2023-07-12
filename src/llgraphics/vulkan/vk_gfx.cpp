@@ -16,6 +16,16 @@ Result<> VkGfx::setupVulkan() {
     return {};
 }
 
+Result<> VkGfx::attachVulkan(Window *window) {
+	info$("attaching vulkan to window");
 
+	(void)window;
+	try$(pickPhysicalDevice());
+	try$(setupLogicalDevice());
+
+
+	return {};
+
+};
 
 }; // namespace plt

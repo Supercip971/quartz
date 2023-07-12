@@ -25,7 +25,8 @@ Result<> Gfx::init() {
 Result<> Gfx::attach(plt::Window &target) {
     debug$("attaching to window: {}", target.handle());
 
-    (void)target;
+	try$(instance.attachVulkan(&target));
+
     return {};
 }
 void Gfx::cleanup(void) {

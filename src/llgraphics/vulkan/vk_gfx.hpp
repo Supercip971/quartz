@@ -5,6 +5,7 @@
 
 #include "llgraphics/gfx.hpp"
 #include "utils/traits.hpp"
+#include "llgraphics/vulkan/device/physical.hpp"
 
 namespace plt {
 
@@ -12,10 +13,22 @@ class VkGfx : public NoCopy, public Gfx {
 
 public:
     Result<> setupVulkan();
+	Result<> attachVulkan(Window *window);
 
     Result<> createInstance();
 
     Result<> setupDebugMessanger();
+
+	Result<> pickPhysicalDevice();
+
+    Result<> setupLogicalDevice();
+
+
+	QueueFamilyIndices findPhysicalDeviceQueueFamily();
+
+
+
+
 
     void vulkanDeinit() {
 
@@ -28,11 +41,21 @@ public:
         info$("vulkan deinitilized");
     }
 
+
+	
 private:
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;
 
+
+	/* in instance */
     vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debugMessenger;
+
+	/* in device */
+	vk::PhysicalDevice physicalDevice;
+	vk::Device LogicalDevice; 
+
+	vk::Queue graphicsQueue;
 };
 
 [[maybe_unused]] static inline Result<> vkTry(vk::Result res) {

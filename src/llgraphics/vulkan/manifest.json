@@ -11,6 +11,7 @@
     ],
     "subdirs": [
       "instance",
+	  "device",
       ""
     ],
     "provides": [
