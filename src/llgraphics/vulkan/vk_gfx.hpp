@@ -29,6 +29,8 @@ public:
 
 	Result<> setupSwapchain(Window *window);
 
+	Result<> createImageViews();
+
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -73,6 +75,9 @@ private:
 	/* swapchains */
 	vk::SwapchainKHR swapchain;
 	std::vector<vk::Image> swapchainImages;
+
+	std::vector<vk::ImageView> swapchainImageViews;
+
 	vk::Format swapchainImageFormat;
 	vk::Extent2D swapchainExtent;
 
