@@ -6,8 +6,8 @@
 
 #include "llgraphics/gfx.hpp"
 #include "llgraphics/vulkan/device/physical.hpp"
-#include "utils/traits.hpp"
 #include "llgraphics/vulkan/surface/swapchain.hpp"
+#include "utils/traits.hpp"
 
 namespace plt {
 
@@ -27,10 +27,9 @@ public:
 
     Result<> setupLogicalDevice();
 
-	Result<> setupSwapchain(Window *window);
+    Result<> setupSwapchain(Window *window);
 
-	Result<> createImageViews();
-
+    Result<> createImageViews();
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -45,14 +44,13 @@ public:
         info$("vulkan deinitilized");
     }
 
-	QueueFamilyIndices findPhysicalDeviceQueueFamily(vk::PhysicalDevice device);
+    QueueFamilyIndices findPhysicalDeviceQueueFamily(vk::PhysicalDevice device);
 
-	bool isDeviceSuitable(vk::PhysicalDevice device);
+    bool isDeviceSuitable(vk::PhysicalDevice device);
 
-	bool hasDeviceExtensions(vk::PhysicalDevice device);
+    bool hasDeviceExtensions(vk::PhysicalDevice device);
 
-	SwapchainSupportInfos querySwapchainSupport(vk::PhysicalDevice device);
-
+    SwapchainSupportInfos querySwapchainSupport(vk::PhysicalDevice device);
 
 private:
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;
@@ -67,24 +65,21 @@ private:
     vk::PhysicalDevice physicalDevice;
     vk::Device LogicalDevice;
 
-
-	QueueFamilyIndices queueFamilyIndices;
+    QueueFamilyIndices queueFamilyIndices;
     vk::Queue graphicsQueue;
-	vk::Queue presentQueue;
-	
-	/* swapchains */
-	vk::SwapchainKHR swapchain;
-	std::vector<vk::Image> swapchainImages;
+    vk::Queue presentQueue;
 
-	std::vector<vk::ImageView> swapchainImageViews;
+    /* swapchains */
+    vk::SwapchainKHR swapchain;
+    std::vector<vk::Image> swapchainImages;
 
-	vk::Format swapchainImageFormat;
-	vk::Extent2D swapchainExtent;
+    std::vector<vk::ImageView> swapchainImageViews;
 
+    vk::Format swapchainImageFormat;
+    vk::Extent2D swapchainExtent;
 
-	static constexpr std::array deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
-	};
+    static constexpr std::array deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 
 [[maybe_unused]] static inline Result<> vkTry(vk::Result res) {

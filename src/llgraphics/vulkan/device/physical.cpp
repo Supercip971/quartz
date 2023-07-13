@@ -1,9 +1,8 @@
 
 #include "llgraphics/vulkan/device/physical.hpp"
+#include <set>
 
 #include "llgraphics/vulkan/vk_gfx.hpp"
-
-#include <set>
 namespace plt {
 
 struct ScoredDevice {
@@ -27,7 +26,7 @@ float deviceScore(vk::PhysicalDevice device) {
 }
 
 QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily() {
-   	return findPhysicalDeviceQueueFamily(this->physicalDevice); 
+    return findPhysicalDeviceQueueFamily(this->physicalDevice);
 }
 
 QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily(vk::PhysicalDevice device) {
@@ -39,27 +38,24 @@ QueueFamilyIndices VkGfx::findPhysicalDeviceQueueFamily(vk::PhysicalDevice devic
         if (queueFamilies[i].queueFlags & vk::QueueFlagBits::eGraphics) {
             result = result.withGraphicsFamily(i);
         }
-		if(device.getSurfaceSupportKHR(i, surface)) {
-			result = result.withPresentFamily(i);
-		}
+        if (device.getSurfaceSupportKHR(i, surface)) {
+            result = result.withPresentFamily(i);
+        }
     }
 
     return result;
 }
 
+bool VkGfx::hasDeviceExtensions(vk::PhysicalDevice device) {
+    auto availableExtensions = device.enumerateDeviceExtensionProperties();
 
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-bool VkGfx::hasDeviceExtensions(vk::PhysicalDevice device)
-{
-	auto availableExtensions = device.enumerateDeviceExtensionProperties();
+    for (auto const &extension : availableExtensions) {
+        requiredExtensions.erase(extension.extensionName);
+    }
 
-	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-
-	for(const auto& extension : availableExtensions) {
-		requiredExtensions.erase(extension.extensionName);
-	}
-
-	return requiredExtensions.empty();
+    return requiredExtensions.empty();
 }
 
 bool VkGfx::isDeviceSuitable(vk::PhysicalDevice device) {
@@ -68,11 +64,11 @@ bool VkGfx::isDeviceSuitable(vk::PhysicalDevice device) {
 
     auto indices = findPhysicalDeviceQueueFamily(device);
 
-	bool goodSwapchain = false;
-	if(hasDeviceExtensions(device)) {
-		auto swapchainSupport = querySwapchainSupport(device);
-		goodSwapchain = !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
-	}
+    bool goodSwapchain = false;
+    if (hasDeviceExtensions(device)) {
+        auto swapchainSupport = querySwapchainSupport(device);
+        goodSwapchain = !swapchainSupport.formats.empty() && !swapchainSupport.presentModes.empty();
+    }
 
     return features.geometryShader && indices.isComplete() && hasDeviceExtensions(device) && goodSwapchain;
 }

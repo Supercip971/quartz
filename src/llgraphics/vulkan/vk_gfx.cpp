@@ -19,12 +19,11 @@ Result<> VkGfx::setupVulkan() {
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
-
-	try$(setupSurface(window));
+    try$(setupSurface(window));
     try$(pickPhysicalDevice());
     try$(setupLogicalDevice());
-	try$(setupSwapchain(window));
-	try$(createImageViews());
+    try$(setupSwapchain(window));
+    try$(createImageViews());
 
     return {};
 };

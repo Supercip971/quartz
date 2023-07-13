@@ -2,7 +2,6 @@
 
 #include <window/window.hpp>
 
-
 #define GLFW_INCLUDE_VULKAN
 #define GLFW_EXPOSE_NATIVE_X11
 #define VK_USE_PLATFORM_XLIB_KHR
@@ -181,7 +180,7 @@ void Window::set_root() {
 
 Result<vk::SurfaceKHR> Window::create_surface(vk::Instance instance) {
     VkSurfaceKHR surface;
-	/*
+    /*
 
     VkXlibSurfaceCreateInfoKHR createInfo = {
         .dpy = glfwGetX11Display(),
@@ -193,10 +192,9 @@ Result<vk::SurfaceKHR> Window::create_surface(vk::Instance instance) {
         return Result<vk::SurfaceKHR>::err("failed to create window surface!");
     }*/
 
-
-	if(glfwCreateWindowSurface(instance, window_id(*this), nullptr, &surface) != VK_SUCCESS) {
-		return Result<vk::SurfaceKHR>::err("failed to create window surface!");
-	}
+    if (glfwCreateWindowSurface(instance, window_id(*this), nullptr, &surface) != VK_SUCCESS) {
+        return Result<vk::SurfaceKHR>::err("failed to create window surface!");
+    }
     return Result<vk::SurfaceKHR>::ok(surface);
 }
 
@@ -232,23 +230,20 @@ std::vector<char const *> Window::required_extensions() {
     }
     return ext;
 }
-Result<int> Window::fb_width()
-{
-	int _width;
-	int _height;
+Result<int> Window::fb_width() {
+    int _width;
+    int _height;
 
-	glfwGetFramebufferSize(window_id(*this), &_width, &_height);
-	return Result<int>::ok(_width);
-
+    glfwGetFramebufferSize(window_id(*this), &_width, &_height);
+    return Result<int>::ok(_width);
 }
 
-Result<int> Window::fb_height()
-{
-	int _width;
-	int _height;
+Result<int> Window::fb_height() {
+    int _width;
+    int _height;
 
-	glfwGetFramebufferSize(window_id(*this), &_width, &_height);
-	return Result<int>::ok(_height);
+    glfwGetFramebufferSize(window_id(*this), &_width, &_height);
+    return Result<int>::ok(_height);
 }
 
 } // namespace plt

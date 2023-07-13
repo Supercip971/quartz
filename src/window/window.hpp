@@ -37,11 +37,10 @@ public:
 
     Result<int> height();
 
+    /* used by vulkan to query framebuffer */
+    Result<int> fb_width();
 
-	/* used by vulkan to query framebuffer */
-	Result<int> fb_width();
-
-	Result<int> fb_height();
+    Result<int> fb_height();
 
     void update();
 

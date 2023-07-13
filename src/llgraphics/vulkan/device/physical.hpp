@@ -18,33 +18,30 @@ struct QueueFamilyIndice {
     }
 };
 
-
 struct QueueFamilyIndices {
-	QueueFamilyIndice graphicsFamily;
-	QueueFamilyIndice presentFamily;
+    QueueFamilyIndice graphicsFamily;
+    QueueFamilyIndice presentFamily;
 
+    QueueFamilyIndices() = default;
+    QueueFamilyIndices(QueueFamilyIndice graphicsFamily) : graphicsFamily(graphicsFamily) {}
 
-	QueueFamilyIndices() = default;
-	QueueFamilyIndices(QueueFamilyIndice graphicsFamily) : graphicsFamily(graphicsFamily) {}
+    QueueFamilyIndices(QueueFamilyIndice graphicsFamily, QueueFamilyIndice presentFamily) : graphicsFamily(graphicsFamily), presentFamily(presentFamily) {}
 
-	QueueFamilyIndices(QueueFamilyIndice graphicsFamily, QueueFamilyIndice presentFamily) : graphicsFamily(graphicsFamily), presentFamily(presentFamily) {}
-	
-	QueueFamilyIndices withPresentFamily(QueueFamilyIndice presentFamily) {
-		return QueueFamilyIndices(graphicsFamily, presentFamily);
-	}
+    QueueFamilyIndices withPresentFamily(QueueFamilyIndice presentFamily) {
+        return QueueFamilyIndices(graphicsFamily, presentFamily);
+    }
 
-	QueueFamilyIndices withGraphicsFamily(QueueFamilyIndice graphicsFamily) {
-		return QueueFamilyIndices(graphicsFamily, presentFamily);
-	}
+    QueueFamilyIndices withGraphicsFamily(QueueFamilyIndice graphicsFamily) {
+        return QueueFamilyIndices(graphicsFamily, presentFamily);
+    }
 
+    operator bool() const {
+        return graphicsFamily && presentFamily;
+    }
 
-	operator bool() const {
-		return graphicsFamily && presentFamily;
-	}
-
-	bool isComplete() const {
-		return graphicsFamily && presentFamily;
-	}
+    bool isComplete() const {
+        return graphicsFamily && presentFamily;
+    }
 };
 
 } // namespace plt
