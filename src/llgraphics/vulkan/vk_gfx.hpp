@@ -5,9 +5,12 @@
 #include <vulkan/vulkan_handles.hpp>
 
 #include "llgraphics/gfx.hpp"
+#include "llgraphics/vulkan/utils.hpp"
+
 #include "llgraphics/vulkan/device/physical.hpp"
 #include "llgraphics/vulkan/surface/swapchain.hpp"
 #include "utils/traits.hpp"
+#include "llgraphics/vulkan/pipeline/shaders.hpp"
 
 namespace plt {
 
@@ -30,6 +33,8 @@ public:
     Result<> setupSwapchain(Window *window);
 
     Result<> createImageViews();
+
+	Result<> createShaderPipeline();
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -78,17 +83,14 @@ private:
     vk::Format swapchainImageFormat;
     vk::Extent2D swapchainExtent;
 
+
+	/* graphic pipeline */
+
+	Shader vertShader;
+	Shader fragShader;
+
+	ShaderPipeline shaderPipeline;
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
-
-[[maybe_unused]] static inline Result<> vkTry(vk::Result res) {
-    if (res != vk::Result::eSuccess) {
-        return Result<>::err("vulkan error: {}", (uint32_t)res);
-    }
-    return {};
-}
-
-#define vkTry$(r) try$(vkTry(r))
-
 } // namespace plt

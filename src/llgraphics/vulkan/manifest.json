@@ -13,6 +13,7 @@
       "instance",
 	  "device",
 	  "surface",
+	  "pipeline",
       ""
     ],
     "provides": [
