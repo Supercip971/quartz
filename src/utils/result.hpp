@@ -1,7 +1,9 @@
 #pragma once
+#include <functional>
 #include <optional>
 #include <string>
 #include <variant>
+#include <type_traits>
 
 #include "log.hpp"
 #include "traits.hpp"
@@ -9,10 +11,39 @@ namespace plt {
 
 struct EmptyRes {
 };
+
+
+
+
+template <class T>
+struct SubRef_I 
+{
+    typedef T type;
+};
+
+template <class T>
+struct SubRef_I<T &>
+{
+    typedef std::reference_wrapper<T> type;
+};
+
+template <class T>
+struct SubRef_I<T &&>
+{
+    typedef std::reference_wrapper<T> type;
+};
+
+template <class T>
+using SubRef = typename SubRef_I<T>::type;
+
+
 template <class T = plt::EmptyRes>
 struct Result : public NoCopy {
-    std::variant<T, std::string> value = {};
 
+    std::variant<SubRef<T>, std::string> value = {};
+
+	using value_type = std::remove_reference_t< T>;
+	using stype = SubRef<T>;
     constexpr Result() : value() {
     }
 
@@ -22,6 +53,8 @@ struct Result : public NoCopy {
     constexpr Result(T &&val)
         : value(std::move(val)) {
     }
+
+	
 
     constexpr Result(std::string const &error)
         : value(error) {
@@ -40,7 +73,7 @@ struct Result : public NoCopy {
     }
 
     constexpr operator bool() const {
-        return std::holds_alternative<T>(value);
+        return std::holds_alternative<stype>(value);
     }
 
     void Assert() const {
@@ -57,8 +90,7 @@ struct Result : public NoCopy {
             fatal$("trying to unwrap a Result that is not valid !\n - {}", std::get<std::string>(value));
         }
 
-        T &&val = std::get<T>(std::move(value));
-        return std::move(val);
+        return (std::get<stype>(std::move(value)));
     }
 
     constexpr T const &read() const {
@@ -99,6 +131,7 @@ struct Result : public NoCopy {
     }
 };
 
+
 template <class T>
 Result<T> success(T &&val) {
     return Result<T>::ok(std::move(val));
@@ -108,6 +141,6 @@ Result<T> success(T const &val) {
     return Result<T>::ok(val);
 }
 
-#define try$(expr) ({ auto _result = (expr); if (!_result) { return fmt::format("try failed: at {}:{}\n - {}", __FILE__, __LINE__, _result.read_error()); } _result.unwrap(); })
+#define try$(expr) ({ auto _result = (expr); if (!_result) { return fmt::format("try failed: at {}:{}\n - {}", __FILE__, __LINE__, _result.read_error()); } (_result.unwrap()); })
 
 }; // namespace plt
