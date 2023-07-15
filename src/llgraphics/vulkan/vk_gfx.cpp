@@ -26,8 +26,9 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createImageViews());
     try$(createShaderPipeline());
     try$(createRenderPass());
-
     try$(createGraphicPipeline());
+    try$(createFramebuffers());
+    try$(createCommandPool());
 
     return {};
 };

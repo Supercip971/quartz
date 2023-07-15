@@ -30,7 +30,7 @@ Result<> Gfx::attach(plt::Window &target) {
     return {};
 }
 void Gfx::cleanup(void) {
-    debug$("cleaning up gfx");
+    info$("cleaning up gfx");
     instance.vulkanDeinit();
 }
 Result<> Gfx::render(void) {

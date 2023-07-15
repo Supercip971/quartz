@@ -37,9 +37,11 @@ public:
 
     Result<> createRenderPass();
 
-    Result<> createGraphicPipelineLayout();
-
     Result<> createGraphicPipeline();
+
+    Result<> createFramebuffers();
+
+    Result<> createCommandPool();
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -99,6 +101,15 @@ private:
     vk::RenderPass renderPass;
     vk::PipelineLayout pipelineLayout;
     vk::Pipeline graphicPipeline;
+
+    /* ---- framebuffers ---- */
+
+    std::vector<vk::Framebuffer> swapchainFramebuffers;
+
+    /* ---- commands---- */
+
+    vk::CommandPool commandPool;
+
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
