@@ -48,11 +48,15 @@ public:
 
     Result<> createCommandBuffers();
 
+    Result<> createSyncObjects();
     Result<> recordRenderCommands(uint32_t imageIndex);
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
     void vulkanDeinit() {
+
+        info$("deinitilizing vulkan");
+        this->LogicalDevice.waitIdle();
 
         for (auto it = this->deinit_funcs.rbegin(); it != this->deinit_funcs.rend(); ++it) {
             (*it)(this);
@@ -118,6 +122,17 @@ private:
     vk::CommandPool commandPool;
 
     VkCmdBuffer cmdBuffer;
+
+    /* ---- synchronization ---- */
+
+    // signal that the image has been acquired and is ready for rendering
+    vk::Semaphore imageAvailableSemaphore;
+
+    // signal that rendering has finished and presentation can happen
+    vk::Semaphore renderFinishedSemaphore;
+
+    // signal that a frame has finished rendering
+    vk::Fence inFlightFence;
 
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {

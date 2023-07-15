@@ -30,9 +30,25 @@ Result<> VkGfx::createRenderPass() {
                        .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
                        .setColorAttachments(colorAttachmentRef);
 
+    // the first subpass (here: 0) needs to wait to the swapchain to finish reading from the image
+    //  thats why we use VK_SUBPASS_EXTERNAL
+    //
+    auto depencency = vk::SubpassDependency()
+                          .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                          .setDstSubpass(0)
+                          // wait for the pipeline to finish reading from the image (swapchain)
+                          .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                          .setSrcAccessMask(vk::AccessFlags())
+                          // wait for the pipeline to finish writing to the image (swapchain)
+                          .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+                          .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
+
+    std::vector<vk::SubpassDependency> dependencies = {depencency};
+
     auto renderPassInfo = vk::RenderPassCreateInfo()
                               .setAttachments(attachments)
-                              .setSubpasses(subpass);
+                              .setSubpasses(subpass)
+                              .setDependencies(dependencies);
 
     vkTry$(this->LogicalDevice.createRenderPass(&renderPassInfo, nullptr, &this->renderPass));
 
