@@ -7,7 +7,7 @@ namespace plt {
 
 Result<> VkGfx::createGraphicPipeline() {
 
-    debug$("creating graphic pipeline");
+    debug$("creating graphic pipeline layout...");
 
     std::vector<vk::DynamicState> dynamic_states = {
         vk::DynamicState::eViewport,
@@ -98,21 +98,42 @@ Result<> VkGfx::createGraphicPipeline() {
                                     .setPSetLayouts(nullptr)
                                     .setPushConstantRangeCount(0)
                                     .setPPushConstantRanges(nullptr);
-
-    /* temporary */
-    (void)colorBlending;
-    (void)multisampling;
-    (void)rasterizer;
-    (void)viewport_state;
-    (void)input_assembly;
-    (void)vertex_input_info;
-    (void)dynamic_states_info;
-
     vkTry$(this->LogicalDevice.createPipelineLayout(&pipeline_layout_info, nullptr, &this->pipelineLayout));
 
     this->deinit_funcs.push_back(
         [](VkGfx *self) {
+            debug$("destroying graphic pipeline layout");
             self->LogicalDevice.destroyPipelineLayout(self->pipelineLayout, nullptr);
+        });
+
+    // creating the graphic pipeline
+
+    debug$("creating graphic pipeline...");
+
+    auto shaderPipelineInfo = this->shaderPipeline.stageInfos();
+
+    auto pipeline_info = vk::GraphicsPipelineCreateInfo()
+                             .setStages(shaderPipelineInfo)
+                             .setPVertexInputState(&vertex_input_info)
+                             .setPInputAssemblyState(&input_assembly)
+                             .setPViewportState(&viewport_state)
+                             .setPRasterizationState(&rasterizer)
+                             .setPMultisampleState(&multisampling)
+                             .setPDepthStencilState(nullptr)
+                             .setPColorBlendState(&colorBlending)
+                             .setPDynamicState(&dynamic_states_info)
+                             .setLayout(this->pipelineLayout)
+                             .setRenderPass(this->renderPass)
+                             .setSubpass(0)
+                             .setBasePipelineHandle(nullptr)
+                             .setBasePipelineIndex(-1);
+
+    vkTry$(this->LogicalDevice.createGraphicsPipelines(nullptr, 1, &pipeline_info, nullptr, &this->graphicPipeline));
+
+    this->deinit_funcs.push_back(
+        [](VkGfx *self) {
+            debug$("destroying graphic pipeline");
+            self->LogicalDevice.destroyPipeline(self->graphicPipeline, nullptr);
         });
 
     return {};

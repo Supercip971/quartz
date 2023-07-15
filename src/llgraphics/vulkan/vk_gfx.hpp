@@ -35,6 +35,10 @@ public:
 
     Result<> createShaderPipeline();
 
+    Result<> createRenderPass();
+
+    Result<> createGraphicPipelineLayout();
+
     Result<> createGraphicPipeline();
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
@@ -61,13 +65,14 @@ public:
 private:
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;
 
-    /* in instance */
+    /* ---- instance ---- */
     vk::Instance instance;
     vk::DebugUtilsMessengerEXT debugMessenger;
 
-    /* surface */
+    /* ---- surface ---- */
     vk::SurfaceKHR surface;
-    /* in device */
+
+    /* ---- device ----*/
     vk::PhysicalDevice physicalDevice;
     vk::Device LogicalDevice;
 
@@ -75,7 +80,7 @@ private:
     vk::Queue graphicsQueue;
     vk::Queue presentQueue;
 
-    /* swapchains */
+    /* ---- swapchains ---- */
     vk::SwapchainKHR swapchain;
     std::vector<vk::Image> swapchainImages;
 
@@ -84,15 +89,17 @@ private:
     vk::Format swapchainImageFormat;
     vk::Extent2D swapchainExtent;
 
-    /* graphic pipeline */
-
+    /* ---- graphic pipeline ---- */
     Shader vertShader;
     Shader fragShader;
 
     ShaderPipeline shaderPipeline;
-    vk::PipelineLayout pipelineLayout;
 
-    //
+    // render pass - framebuffer attachment
+    vk::RenderPass renderPass;
+    vk::PipelineLayout pipelineLayout;
+    vk::Pipeline graphicPipeline;
+    /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
