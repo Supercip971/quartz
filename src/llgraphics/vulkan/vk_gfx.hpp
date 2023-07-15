@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_handles.hpp>
 
 #include "llgraphics/gfx.hpp"
+#include "llgraphics/vulkan/cmd/buffer.hpp"
 #include "llgraphics/vulkan/device/physical.hpp"
 #include "llgraphics/vulkan/pipeline/shaders.hpp"
 #include "llgraphics/vulkan/surface/swapchain.hpp"
@@ -18,6 +19,8 @@ class VkGfx : public NoCopy, public Gfx {
 public:
     Result<> setupVulkan();
     Result<> attachVulkan(Window *window);
+
+    Result<> drawFrame();
 
     Result<> createInstance();
 
@@ -42,6 +45,10 @@ public:
     Result<> createFramebuffers();
 
     Result<> createCommandPool();
+
+    Result<> createCommandBuffers();
+
+    Result<> recordRenderCommands(uint32_t imageIndex);
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -109,6 +116,8 @@ private:
     /* ---- commands---- */
 
     vk::CommandPool commandPool;
+
+    VkCmdBuffer cmdBuffer;
 
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {

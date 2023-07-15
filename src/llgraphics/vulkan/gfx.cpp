@@ -34,6 +34,9 @@ void Gfx::cleanup(void) {
     instance.vulkanDeinit();
 }
 Result<> Gfx::render(void) {
+
+    try$(instance.drawFrame());
     return {};
 }
+
 }; // namespace plt
