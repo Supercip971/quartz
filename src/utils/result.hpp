@@ -3,6 +3,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+
 #include <type_traits>
 
 #include "log.hpp"
@@ -12,38 +13,31 @@ namespace plt {
 struct EmptyRes {
 };
 
-
-
-
 template <class T>
-struct SubRef_I 
-{
+struct SubRef_I {
     typedef T type;
 };
 
 template <class T>
-struct SubRef_I<T &>
-{
+struct SubRef_I<T &> {
     typedef std::reference_wrapper<T> type;
 };
 
 template <class T>
-struct SubRef_I<T &&>
-{
+struct SubRef_I<T &&> {
     typedef std::reference_wrapper<T> type;
 };
 
 template <class T>
 using SubRef = typename SubRef_I<T>::type;
 
-
 template <class T = plt::EmptyRes>
 struct Result : public NoCopy {
 
     std::variant<SubRef<T>, std::string> value = {};
 
-	using value_type = std::remove_reference_t< T>;
-	using stype = SubRef<T>;
+    using value_type = std::remove_reference_t<T>;
+    using stype = SubRef<T>;
     constexpr Result() : value() {
     }
 
@@ -53,8 +47,6 @@ struct Result : public NoCopy {
     constexpr Result(T &&val)
         : value(std::move(val)) {
     }
-
-	
 
     constexpr Result(std::string const &error)
         : value(error) {
@@ -130,7 +122,6 @@ struct Result : public NoCopy {
         return fmt::format("try failed: at {}:{}\n {}", file, line, res.read_error());
     }
 };
-
 
 template <class T>
 Result<T> success(T &&val) {

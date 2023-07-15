@@ -1,12 +1,10 @@
-#pragma once 
+#pragma once
 
-
-#include "utils/result.hpp"
 #include <vulkan/vulkan.hpp>
 
-namespace plt 
-{
+#include "utils/result.hpp"
 
+namespace plt {
 
 [[maybe_unused]] static inline Result<> vkTry(vk::Result res) {
     if (res != vk::Result::eSuccess) {
@@ -17,6 +15,4 @@ namespace plt
 
 #define vkTry$(r) try$(vkTry(r))
 
-
-}
-
+} // namespace plt

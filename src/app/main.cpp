@@ -1,9 +1,13 @@
 
 #include <iostream>
 #include <llgraphics/gfx.hpp>
+#include <llgraphics/vulkan/pipeline/shaders.hpp>
 #include <stdlib.h>
 #include <window/window.hpp>
-int main(void) {
+int main(int argc, char **argv) {
+
+    (void)argc;
+    (void)argv;
 
     plt::Window::engine_init().unwrap();
     auto window = plt::Window::create("hello world", 1920, 1080).unwrap();
