@@ -49,7 +49,7 @@ public:
     Result<> createCommandBuffers();
 
     Result<> createSyncObjects();
-    Result<> recordRenderCommands(uint32_t imageIndex);
+    Result<> recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex);
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
@@ -76,6 +76,8 @@ public:
     SwapchainSupportInfos querySwapchainSupport(vk::PhysicalDevice device);
 
 private:
+    static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;
 
     /* ---- instance ---- */
@@ -121,18 +123,22 @@ private:
 
     vk::CommandPool commandPool;
 
-    VkCmdBuffer cmdBuffer;
+    std::vector<VkCmdBuffer> cmdBuffer;
 
     /* ---- synchronization ---- */
 
     // signal that the image has been acquired and is ready for rendering
-    vk::Semaphore imageAvailableSemaphore;
+    std::vector<vk::Semaphore> imageAvailableSemaphores;
 
     // signal that rendering has finished and presentation can happen
-    vk::Semaphore renderFinishedSemaphore;
+    std::vector<vk::Semaphore> renderFinishedSemaphores;
 
     // signal that a frame has finished rendering
-    vk::Fence inFlightFence;
+    std::vector<vk::Fence> inFlightFences;
+
+    /* ---- rendering ---- */
+
+    size_t currentFrame = 0;
 
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {

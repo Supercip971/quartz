@@ -1,17 +1,22 @@
 
+#include "llgraphics/vulkan/cmd/buffer.hpp"
+
 #include "llgraphics/vulkan/vk_gfx.hpp"
 namespace plt {
 
 Result<> VkGfx::createCommandBuffers() {
     debug$("creating command buffer...");
-    this->cmdBuffer = try$(VkCmdBuffer::create(this->LogicalDevice, this->commandPool));
+
+    this->cmdBuffer.resize(MAX_FRAMES_IN_FLIGHT);
+
+    this->cmdBuffer = try$(VkCmdBuffer::create_buffers(this->LogicalDevice, this->commandPool, MAX_FRAMES_IN_FLIGHT));
 
     return {};
 }
 
-Result<> VkGfx::recordRenderCommands(uint32_t imageIndex) {
+Result<> VkGfx::recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex) {
 
-    this->cmdBuffer.start();
+    target.start();
 
     {
 
@@ -23,22 +28,22 @@ Result<> VkGfx::recordRenderCommands(uint32_t imageIndex) {
                              .setClearValueCount(1)
                              .setPClearValues(&clearValues);
 
-        this->cmdBuffer->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
+        target->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 
-        this->cmdBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, this->graphicPipeline);
+        target->bindPipeline(vk::PipelineBindPoint::eGraphics, this->graphicPipeline);
 
         auto viewport = vk::Viewport(0.0f, 0.0f, (float)this->swapchainExtent.width, (float)this->swapchainExtent.height, 0.0f, 1.0f);
-        this->cmdBuffer->setViewport(0, 1, &viewport);
+        target->setViewport(0, 1, &viewport);
         vk::Rect2D scissor(vk::Offset2D(0, 0), this->swapchainExtent);
 
-        this->cmdBuffer->setScissor(0, 1, &scissor);
+        target->setScissor(0, 1, &scissor);
 
-        this->cmdBuffer->draw(3, 1, 0, 0);
+        target->draw(3, 1, 0, 0);
 
-        this->cmdBuffer->endRenderPass();
+        target->endRenderPass();
     }
 
-    this->cmdBuffer.end();
+    target.end();
 
     return {};
 }

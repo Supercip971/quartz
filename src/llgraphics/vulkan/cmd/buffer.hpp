@@ -13,6 +13,7 @@ class VkCmdBuffer : public NoCopy {
 
 public:
     VkCmdBuffer() = default;
+    VkCmdBuffer(vk::CommandBuffer buffer) : buffer(buffer) {}
     vk::CommandBuffer *operator->() {
         return &this->buffer;
     }
@@ -35,6 +36,29 @@ public:
         vkTry$(device.allocateCommandBuffers(&allocInfo, &buffer.buffer));
 
         return std::move(buffer);
+    }
+
+    static Result<std::vector<VkCmdBuffer>> create_buffers(
+        vk::Device device,
+        vk::CommandPool pool,
+        size_t count,
+        vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary) {
+
+        std::vector<vk::CommandBuffer> buffers(count);
+        auto allocInfo = vk::CommandBufferAllocateInfo()
+                             .setCommandPool(pool)
+                             .setLevel(level)
+                             .setCommandBufferCount(count);
+
+        vkTry$(device.allocateCommandBuffers(&allocInfo, buffers.data()));
+
+        std::vector<VkCmdBuffer> cmd_buffers;
+        cmd_buffers.reserve(count);
+        for (auto &buffer : buffers) {
+            cmd_buffers.push_back(VkCmdBuffer(buffer));
+        }
+
+        return std::move(cmd_buffers);
     }
 
     Result<> start(vk::CommandBufferUsageFlags flags = {}) {

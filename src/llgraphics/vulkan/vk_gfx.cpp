@@ -52,21 +52,21 @@ Result<> VkGfx::drawFrame() {
 
     uint32_t imageIndex;
 
-    vkTry$(this->LogicalDevice.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex));
+    vkTry$(this->LogicalDevice.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex));
 
-    std::vector<vk::Fence> waitFences = {this->inFlightFence};
+    std::vector<vk::Fence> waitFences = {this->inFlightFences[currentFrame]};
     vkTry$(this->LogicalDevice.waitForFences(waitFences, VK_TRUE, UINT64_MAX));
 
     this->LogicalDevice.resetFences(waitFences);
 
-    this->cmdBuffer->reset();
+    this->cmdBuffer[currentFrame]->reset();
 
-    this->recordRenderCommands(imageIndex);
+    this->recordRenderCommands(cmdBuffer[currentFrame], imageIndex);
 
     std::vector<vk::PipelineStageFlags> waitStages = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-    std::vector<vk::Semaphore> waitSemaphores = {this->imageAvailableSemaphore};
-    std::vector<vk::CommandBuffer> commandBuffers = {this->cmdBuffer.buf()};
-    std::vector<vk::Semaphore> signalSemaphores = {this->renderFinishedSemaphore};
+    std::vector<vk::Semaphore> waitSemaphores = {this->imageAvailableSemaphores[currentFrame]};
+    std::vector<vk::CommandBuffer> commandBuffers = {this->cmdBuffer[currentFrame].buf()};
+    std::vector<vk::Semaphore> signalSemaphores = {this->renderFinishedSemaphores[currentFrame]};
 
     // we will wait until trying to write the image that the 'ImageAvailableSemaphore' is signaled
     // then we will signal the 'RenderFinishedSemaphore' when we are done writing the image
@@ -76,7 +76,7 @@ Result<> VkGfx::drawFrame() {
                           .setCommandBuffers(commandBuffers)
                           .setSignalSemaphores(signalSemaphores);
 
-    (this->graphicsQueue.submit(submitInfo, this->inFlightFence));
+    (this->graphicsQueue.submit(submitInfo, this->inFlightFences[currentFrame]));
 
     vk::SwapchainKHR swapchains[] = {this->swapchain};
     vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
@@ -86,6 +86,7 @@ Result<> VkGfx::drawFrame() {
 
     vkTry$(presentQueue.presentKHR(presentInfo));
 
+    currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return {};
 }
 

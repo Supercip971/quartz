@@ -4,21 +4,28 @@ namespace plt {
 
 Result<> VkGfx::createSyncObjects() {
 
-    debug$("creating sync objects...");
+    this->imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    this->renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    this->inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     auto semaphoreInfo = vk::SemaphoreCreateInfo();
     auto fenceInfo = vk::FenceCreateInfo().setFlags(vk::FenceCreateFlagBits::eSignaled);
 
-    vkTry$(this->LogicalDevice.createSemaphore(&semaphoreInfo, nullptr, &this->imageAvailableSemaphore));
-    vkTry$(this->LogicalDevice.createSemaphore(&semaphoreInfo, nullptr, &this->renderFinishedSemaphore));
-    vkTry$(this->LogicalDevice.createFence(&fenceInfo, nullptr, &this->inFlightFence));
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 
-    this->deinit_funcs.push_back([](VkGfx *self) {
-        debug$("destroying sync objects...");
-        self->LogicalDevice.destroySemaphore(self->imageAvailableSemaphore);
-        self->LogicalDevice.destroySemaphore(self->renderFinishedSemaphore);
-        self->LogicalDevice.destroyFence(self->inFlightFence);
-    });
+        debug$("creating sync objects (frame: {})...", i);
+
+        vkTry$(this->LogicalDevice.createSemaphore(&semaphoreInfo, nullptr, &this->imageAvailableSemaphores[i]));
+        vkTry$(this->LogicalDevice.createSemaphore(&semaphoreInfo, nullptr, &this->renderFinishedSemaphores[i]));
+        vkTry$(this->LogicalDevice.createFence(&fenceInfo, nullptr, &this->inFlightFences[i]));
+
+        this->deinit_funcs.push_back([i](VkGfx *self) {
+            debug$("destroying sync objects (frame: {})...", i);
+            self->LogicalDevice.destroySemaphore(self->imageAvailableSemaphores[i]);
+            self->LogicalDevice.destroySemaphore(self->renderFinishedSemaphores[i]);
+            self->LogicalDevice.destroyFence(self->inFlightFences[i]);
+        });
+    }
     return {};
 }
 
