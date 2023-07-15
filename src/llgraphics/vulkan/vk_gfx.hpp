@@ -35,6 +35,8 @@ public:
 
     Result<> createShaderPipeline();
 
+    Result<> createGraphicPipeline();
+
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
 
     void vulkanDeinit() {
@@ -88,6 +90,9 @@ private:
     Shader fragShader;
 
     ShaderPipeline shaderPipeline;
+    vk::PipelineLayout pipelineLayout;
+
+    //
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
