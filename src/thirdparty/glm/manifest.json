@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schemas.cute.engineering/stable/cutekit.manifest.component.v1",
+    "id": "glm",
+    "type": "lib",
+    "description": "An OpenGL focused mathematic library",
+    "tools": {
+        "cc": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "glm"
+            ]
+        },
+        "cxx": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--cflags",
+                "glm"
+            ]
+        },
+        "ld": {
+            "args": [
+                "@exec",
+                "pkg-config",
+                "--libs",
+                "glm"
+            ]
+        }
+    }
+}

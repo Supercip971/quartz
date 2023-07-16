@@ -3,21 +3,21 @@
     "type": "lib",
     "id": "low-level-graphics-vulkan",
     "description": "Vulkan API interection",
-    
     "requires": [
-      "utils",
-      "window",
-      "vulkan"
+		"utils",
+		"window",
+		"vulkan",
+		"glm"
     ],
     "subdirs": [
-      "instance",
-	  "device",
-	  "surface",
-	  "pipeline",
-	  "cmd",
-      ""
+		"instance",
+		"device",
+		"surface",
+		"pipeline",
+		"cmd",
+		""
     ],
     "provides": [
-      "gfx"
+		"gfx"
     ]
   }
