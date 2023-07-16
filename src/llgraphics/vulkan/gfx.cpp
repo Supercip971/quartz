@@ -29,6 +29,14 @@ Result<> Gfx::attach(plt::Window &target) {
 
     return {};
 }
+
+Result<> Gfx::resize(plt::Window &target) {
+    debug$("resizing window: {}", target.handle());
+
+    try$(instance.resizeSwapchain(&target));
+
+    return {};
+}
 void Gfx::cleanup(void) {
     info$("cleaning up gfx");
     instance.vulkanDeinit();

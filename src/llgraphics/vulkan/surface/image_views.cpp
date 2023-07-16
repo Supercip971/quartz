@@ -3,7 +3,7 @@
 #include <vulkan/vulkan_structs.hpp>
 namespace plt {
 
-Result<> VkGfx::createImageViews() {
+Result<> VkGfx::createImageViews(bool recreated) {
 
     debug$("creating image views");
 
@@ -30,10 +30,12 @@ Result<> VkGfx::createImageViews() {
 
         vkTry$(this->LogicalDevice.createImageView(&createInfo, nullptr, &this->swapchainImageViews[i]));
 
-        this->deinit_funcs.push_back([=](VkGfx *gfx) {
-            debug$("destroying image view: {}", i);
-            gfx->LogicalDevice.destroyImageView(gfx->swapchainImageViews[i]);
-        });
+        if (!recreated) {
+            this->deinit_funcs.push_back([=](VkGfx *gfx) {
+                debug$("destroying image view: {}", i);
+                gfx->LogicalDevice.destroyImageView(gfx->swapchainImageViews[i]);
+            });
+        }
     }
     return {};
 }

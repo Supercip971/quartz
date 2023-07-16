@@ -53,6 +53,8 @@ static std::string validationLayerFlagStr(VkDebugUtilsMessageTypeFlagsEXT flags)
 
     return str;
 }
+
+int error_count = 6;
 static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -61,7 +63,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL validationLayerCallback(
     (void)pUserData;
 
     if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+
         error$("[VULKAN]({}): {}", validationLayerFlagStr(messageType), pCallbackData->pMessage);
+        if (error_count-- == 0) {
+            abort();
+        }
     } else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
         warn$("[VULKAN]({}): {}", validationLayerFlagStr(messageType), pCallbackData->pMessage);
     } else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {

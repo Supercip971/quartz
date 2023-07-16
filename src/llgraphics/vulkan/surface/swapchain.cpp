@@ -6,7 +6,33 @@
 #include "llgraphics/vulkan/surface/swapchain.hpp"
 
 namespace plt {
-Result<> VkGfx::setupSwapchain(Window *window) {
+
+Result<> VkGfx::cleanupSwapchain(Window *window) {
+    (void)window;
+
+    for (auto framebuffer : this->swapchainFramebuffers) {
+        LogicalDevice.destroyFramebuffer(framebuffer);
+    }
+
+    for (auto imageView : this->swapchainImageViews) {
+        LogicalDevice.destroyImageView(imageView);
+    }
+
+    LogicalDevice.destroySwapchainKHR(this->swapchain, nullptr);
+    return {};
+}
+Result<> VkGfx::recreateSwapchain(Window *window) {
+    this->LogicalDevice.waitIdle();
+
+    try$(cleanupSwapchain(window));
+    try$(setupSwapchain(window, true));
+    try$(createImageViews(true));
+    try$(createFramebuffers(true));
+
+    this->invalidatedSwapchain = false;
+    return {};
+}
+Result<> VkGfx::setupSwapchain(Window *window, bool recreated) {
 
     debug$("creating swapchain");
 
@@ -53,12 +79,16 @@ Result<> VkGfx::setupSwapchain(Window *window) {
 
     debug$("created swapchain");
 
-    this->deinit_funcs.push_back([](VkGfx *gfx) {
-        debug$("destroying swapchain");
-        gfx->LogicalDevice.destroySwapchainKHR(gfx->swapchain);
-    });
+    if (!recreated) {
+
+        this->deinit_funcs.push_back([](VkGfx *gfx) {
+            debug$("destroying swapchain");
+            gfx->LogicalDevice.destroySwapchainKHR(gfx->swapchain);
+        });
+    }
 
     debug$("getting swapchain images");
+    this->swapchainImages.clear();
     this->swapchainImages = this->LogicalDevice.getSwapchainImagesKHR(this->swapchain);
 
     this->swapchainImageFormat = surfaceFormat.format;

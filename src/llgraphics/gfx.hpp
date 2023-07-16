@@ -11,6 +11,8 @@ public:
 
     Result<> render();
 
+    Result<> resize(plt::Window &target);
+
     void cleanup(void);
 
     static Gfx *the();

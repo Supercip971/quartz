@@ -112,7 +112,6 @@ Result<Window> Window::create(char const *title, int width, int height) {
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     auto window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!window) {
         return Result<Window>::err("glfwCreateWindow failed");

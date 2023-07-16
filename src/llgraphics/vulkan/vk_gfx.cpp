@@ -19,9 +19,15 @@ Result<> VkGfx::setupVulkan() {
     return {};
 }
 
+Result<> VkGfx::resizeSwapchain(Window *window) {
+    info$("resizing swapchain: {}x{}", window->width(), window->height());
+    this->invalidatedSwapchain = true;
+    return {};
+}
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
+    this->window = window;
     try$(setupSurface(window));
     try$(pickPhysicalDevice());
     try$(setupLogicalDevice());
@@ -38,6 +44,25 @@ Result<> VkGfx::attachVulkan(Window *window) {
     return {};
 };
 
+Result<bool> VkGfx::recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal) {
+    if (invalidatedSwapchain && !noSuboptimal) {
+        try$(recreateSwapchain(this->window));
+        return {true};
+    } else if (res == vk::Result::eErrorOutOfDateKHR || (res == vk::Result::eSuboptimalKHR)) {
+
+        if (noSuboptimal && res == vk::Result::eSuboptimalKHR) {
+            return {false};
+        }
+
+        try$(recreateSwapchain(this->window));
+        return {true};
+    } else if (res != vk::Result::eSuccess) {
+        error$("failed to acquire swapchain image");
+        vkTry$(res);
+        return {false};
+    }
+    return {false};
+}
 /*
  *
  * Semaphore:
@@ -52,10 +77,13 @@ Result<> VkGfx::drawFrame() {
 
     uint32_t imageIndex;
 
-    vkTry$(this->LogicalDevice.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex));
-
     std::vector<vk::Fence> waitFences = {this->inFlightFences[currentFrame]};
     vkTry$(this->LogicalDevice.waitForFences(waitFences, VK_TRUE, UINT64_MAX));
+    auto res = (this->LogicalDevice.acquireNextImageKHR(this->swapchain, UINT64_MAX, this->imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex));
+
+    if (try$(recreateSwapchainIfNecessary(res, true))) {
+        return {};
+    }
 
     this->LogicalDevice.resetFences(waitFences);
 
@@ -84,8 +112,9 @@ Result<> VkGfx::drawFrame() {
                                          .setSwapchains(swapchains)
                                          .setImageIndices(imageIndex);
 
-    vkTry$(presentQueue.presentKHR(presentInfo));
+    res = (presentQueue.presentKHR(presentInfo));
 
+    try$(recreateSwapchainIfNecessary(res, false));
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     return {};
 }

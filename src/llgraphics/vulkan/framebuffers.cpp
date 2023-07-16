@@ -3,7 +3,7 @@
 #include <vulkan/vulkan_handles.hpp>
 namespace plt {
 
-Result<> VkGfx::createFramebuffers() {
+Result<> VkGfx::createFramebuffers(bool recreated) {
 
     this->swapchainFramebuffers.resize(this->swapchainImageViews.size());
 
@@ -21,10 +21,13 @@ Result<> VkGfx::createFramebuffers() {
 
         vkTry$(this->LogicalDevice.createFramebuffer(&framebufferInfo, nullptr, &this->swapchainFramebuffers[i]));
 
-        this->deinit_funcs.push_back([i](VkGfx *gfx) {
-            gfx->LogicalDevice.destroyFramebuffer(gfx->swapchainFramebuffers[i]);
-            debug$("framebuffer destroyed: {}", i);
-        });
+        if (!recreated) {
+
+            this->deinit_funcs.push_back([i](VkGfx *gfx) {
+                gfx->LogicalDevice.destroyFramebuffer(gfx->swapchainFramebuffers[i]);
+                debug$("framebuffer destroyed: {}", i);
+            });
+        }
     }
 
     return {};

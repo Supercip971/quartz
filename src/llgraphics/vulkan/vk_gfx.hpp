@@ -11,6 +11,7 @@
 #include "llgraphics/vulkan/surface/swapchain.hpp"
 #include "llgraphics/vulkan/utils.hpp"
 #include "utils/traits.hpp"
+#include "window/window.hpp"
 
 namespace plt {
 
@@ -32,9 +33,9 @@ public:
 
     Result<> setupLogicalDevice();
 
-    Result<> setupSwapchain(Window *window);
+    Result<> setupSwapchain(Window *window, bool recreated = false);
 
-    Result<> createImageViews();
+    Result<> createImageViews(bool recreated = false);
 
     Result<> createShaderPipeline();
 
@@ -42,13 +43,20 @@ public:
 
     Result<> createGraphicPipeline();
 
-    Result<> createFramebuffers();
+    Result<> createFramebuffers(bool recreated = false);
 
     Result<> createCommandPool();
 
     Result<> createCommandBuffers();
 
     Result<> createSyncObjects();
+
+    Result<> recreateSwapchain(Window *window);
+
+    Result<> cleanupSwapchain(Window *window);
+
+    Result<> resizeSwapchain(Window *window);
+
     Result<> recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex);
 
     QueueFamilyIndices findPhysicalDeviceQueueFamily();
@@ -75,7 +83,13 @@ public:
 
     SwapchainSupportInfos querySwapchainSupport(vk::PhysicalDevice device);
 
+    Result<bool> recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal = false);
+
 private:
+    bool invalidatedSwapchain = false;
+
+    /* ---- window ---- */
+    plt::Window *window = nullptr;
     static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
     std::vector<std::function<void(VkGfx *)>> deinit_funcs;

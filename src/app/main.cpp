@@ -4,6 +4,8 @@
 #include <llgraphics/vulkan/pipeline/shaders.hpp>
 #include <stdlib.h>
 #include <window/window.hpp>
+
+#include "window/input.hpp"
 int main(int argc, char **argv) {
 
     (void)argc;
@@ -17,8 +19,14 @@ int main(int argc, char **argv) {
     plt::Gfx::init().unwrap();
     plt::Gfx::the()->attach(window).unwrap();
 
+    window.add_callback(plt::WINDOW_CALLBACK_RESIZE, [](plt::Window &target, auto callback) {
+        (void)callback;
+        plt::Gfx::the()->resize(target).unwrap();
+    });
+
     while (!window.should_close()) {
         window.update();
+
         plt::Gfx::the()->render().unwrap();
     }
 
