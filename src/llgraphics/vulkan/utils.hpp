@@ -19,5 +19,7 @@ namespace plt {
 	{
 		vk::Device dev;
 		vk::PhysicalDevice physDev;
+		vk::CommandPool cmdPool;
+		vk::Queue gfxQueue;
 	};
 } // namespace plt

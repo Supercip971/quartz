@@ -89,11 +89,11 @@ public:
 
     Result<bool> recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal = false);
 
-
 	GpuCtx ctx()
 	{
-		return {this->LogicalDevice, this->physicalDevice};
+		return {this->LogicalDevice, this->physicalDevice, this->commandPool, this->graphicsQueue};
 	}
+
 private:
     bool invalidatedSwapchain = false;
 

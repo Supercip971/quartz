@@ -3,7 +3,9 @@
 
 #include <llgraphics/vulkan/mesh/vertex.hpp>
 #include <llgraphics/vulkan/mem/mem.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include "llgraphics/vulkan/cmd/buffer.hpp"
 
 namespace plt 
 {
@@ -53,13 +55,30 @@ namespace plt
 
 		Result<> allocateGpuBuffers(GpuCtx dev)
 		{
-			_vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+			auto stagingBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+			_vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
 
-			volatile auto mapped = (volatile T*)_vertexBuffer.map();
-
+			volatile auto mapped = (volatile T*)stagingBuffer.map();
 			memcpy((void*)mapped, _vertices, _numVertices * sizeof(T));
+			stagingBuffer.unmap();
 
-			_vertexBuffer.unmap();
+			auto cmdBuffer = try$(VkCmdBuffer::create(dev.dev, dev.cmdPool));
+
+			cmdBuffer.start(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+			{
+				cmdBuffer->copyBuffer(stagingBuffer.buffer(), _vertexBuffer.buffer(), vk::BufferCopy(0, 0, _numVertices * sizeof(T)));
+			}
+			cmdBuffer.end();
+
+			dev.gfxQueue.submit(
+					vk::SubmitInfo()
+						.setCommandBufferCount(1)
+						.setPCommandBuffers(&cmdBuffer.buf()), 
+					vk::Fence());
+			dev.gfxQueue.waitIdle();
+
+			cmdBuffer.release();
+
 			return {};
 		}
 
