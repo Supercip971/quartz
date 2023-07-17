@@ -8,6 +8,8 @@
 #include <vulkan/vulkan_structs.hpp>
 
 #include "llgraphics/vulkan/cmd/buffer.hpp"
+#include "llgraphics/vulkan/mesh/mesh.hpp"
+#include "llgraphics/vulkan/mesh/vertex.hpp"
 #include "utils/log.hpp"
 #include "window/window.hpp"
 namespace plt {
@@ -24,9 +26,16 @@ Result<> VkGfx::resizeSwapchain(Window *window) {
     this->invalidatedSwapchain = true;
     return {};
 }
+
+std::vector<NVertex> points = {
+	NVertex({0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}),
+	NVertex({0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}),
+	NVertex({-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}),
+};
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
+	this->mesh = plt::VkMesh<>();
     this->window = window;
     try$(setupSurface(window));
     try$(pickPhysicalDevice());
@@ -35,11 +44,19 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createImageViews());
     try$(createShaderPipeline());
     try$(createRenderPass());
-    try$(createGraphicPipeline());
+    try$(createGraphicPipeline(this->mesh.description()));
     try$(createFramebuffers());
     try$(createCommandPool());
     try$(createCommandBuffers());
     try$(createSyncObjects());
+
+	this->mesh = plt::VkMesh<>(points.data(), points.size());
+	this->mesh.allocateGpuBuffers(this->ctx());
+
+	this->deinit_funcs.push_back([](VkGfx* gfx) {
+			gfx->mesh.releaseGpuBuffers();
+			
+			});
 
     return {};
 };

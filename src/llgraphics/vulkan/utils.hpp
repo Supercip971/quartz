@@ -15,4 +15,9 @@ namespace plt {
 
 #define vkTry$(r) try$(vkTry(r))
 
+	struct GpuCtx 
+	{
+		vk::Device dev;
+		vk::PhysicalDevice physDev;
+	};
 } // namespace plt

@@ -15,6 +15,7 @@
 		"surface",
 		"pipeline",
 		"cmd",
+		"mem",
 		""
     ],
     "provides": [

@@ -7,11 +7,15 @@
 #include "llgraphics/gfx.hpp"
 #include "llgraphics/vulkan/cmd/buffer.hpp"
 #include "llgraphics/vulkan/device/physical.hpp"
+#include "llgraphics/vulkan/mem/mem.hpp"
+#include "llgraphics/vulkan/mesh/mesh.hpp"
+#include "llgraphics/vulkan/mesh/vertex.hpp"
 #include "llgraphics/vulkan/pipeline/shaders.hpp"
 #include "llgraphics/vulkan/surface/swapchain.hpp"
 #include "llgraphics/vulkan/utils.hpp"
 #include "utils/traits.hpp"
 #include "window/window.hpp"
+
 
 namespace plt {
 
@@ -41,7 +45,7 @@ public:
 
     Result<> createRenderPass();
 
-    Result<> createGraphicPipeline();
+    Result<> createGraphicPipeline(const VertexDescription&meshDescription);
 
     Result<> createFramebuffers(bool recreated = false);
 
@@ -85,6 +89,11 @@ public:
 
     Result<bool> recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal = false);
 
+
+	GpuCtx ctx()
+	{
+		return {this->LogicalDevice, this->physicalDevice};
+	}
 private:
     bool invalidatedSwapchain = false;
 
@@ -154,6 +163,9 @@ private:
 
     size_t currentFrame = 0;
 
+	/* ---- mesh ---- */
+
+	VkMesh<> mesh;
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};
