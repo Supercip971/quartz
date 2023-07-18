@@ -1,7 +1,10 @@
 #pragma once
+#include <llgraphics/vulkan/cmd/buffer.hpp>
 #include <llgraphics/vulkan/utils.hpp>
 
 #include <vulkan/vulkan_structs.hpp>
+
+#include "llgraphics/vulkan/cmd/buffer.hpp"
 
 namespace plt {
 
@@ -51,6 +54,10 @@ public:
         _owner.dev.unmapMemory(_memory);
     }
 
+    static Result<GpuMemory> allocate(GpuCtx ctx, size_t size, vk::BufferUsageFlags usage = {}, vk::MemoryPropertyFlags properties = {});
+
+    static Result<uint32_t> findMemoryType(GpuCtx ctx, uint32_t typeFilter, vk::MemoryPropertyFlags props);
+
     auto deallocate() {
         _owner.dev.destroyBuffer(_buffer);
         _owner.dev.freeMemory(_memory);
@@ -58,9 +65,42 @@ public:
         _memory = nullptr;
     };
 
-    static Result<GpuMemory> allocate(GpuCtx ctx, size_t size, vk::BufferUsageFlags usage = {}, vk::MemoryPropertyFlags properties = {});
+    Result<> stagedCopy(void *data, size_t size) {
 
-    static Result<uint32_t> findMemoryType(GpuCtx ctx, uint32_t typeFilter, vk::MemoryPropertyFlags props);
+        if (size > _size) {
+            return Result<>::err("Data size: {} is larger than buffer size: {}", size, _size);
+        }
+        auto stagingBuffer = try$(GpuMemory::allocate(
+            _owner,
+            size,
+            vk::BufferUsageFlagBits::eTransferSrc,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+
+        auto volatile mapped = (void *)stagingBuffer.map();
+        memcpy((void *)mapped, data, size);
+        stagingBuffer.unmap();
+
+        auto cmdBuffer = try$(plt::VkCmdBuffer::create(_owner.dev, _owner.cmdPool));
+
+        cmdBuffer.start(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        {
+            cmdBuffer->copyBuffer(stagingBuffer.buffer(), buffer(), vk::BufferCopy(0, 0, size));
+        }
+        cmdBuffer.end();
+
+        _owner.gfxQueue.submit(
+            vk::SubmitInfo()
+                .setCommandBufferCount(1)
+                .setPCommandBuffers(&cmdBuffer.buf()),
+            vk::Fence());
+        _owner.gfxQueue.waitIdle();
+
+        cmdBuffer.release();
+
+        stagingBuffer.deallocate();
+
+        return {};
+    }
 };
 
 } // namespace plt

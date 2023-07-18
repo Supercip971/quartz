@@ -48,31 +48,9 @@ public:
     }
 
     Result<> allocateGpuBuffers(GpuCtx dev) {
-        auto stagingBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
         _vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
 
-        auto volatile mapped = (T volatile *)stagingBuffer.map();
-        memcpy((void *)mapped, _vertices, _numVertices * sizeof(T));
-        stagingBuffer.unmap();
-
-        auto cmdBuffer = try$(VkCmdBuffer::create(dev.dev, dev.cmdPool));
-
-        cmdBuffer.start(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-        {
-            cmdBuffer->copyBuffer(stagingBuffer.buffer(), _vertexBuffer.buffer(), vk::BufferCopy(0, 0, _numVertices * sizeof(T)));
-        }
-        cmdBuffer.end();
-
-        dev.gfxQueue.submit(
-            vk::SubmitInfo()
-                .setCommandBufferCount(1)
-                .setPCommandBuffers(&cmdBuffer.buf()),
-            vk::Fence());
-        dev.gfxQueue.waitIdle();
-
-        cmdBuffer.release();
-
-        stagingBuffer.deallocate();
+        try$(_vertexBuffer.stagedCopy(_vertices, _numVertices * sizeof(T)));
 
         return {};
     }
