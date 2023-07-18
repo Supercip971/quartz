@@ -15,11 +15,10 @@ namespace plt {
 
 #define vkTry$(r) try$(vkTry(r))
 
-	struct GpuCtx 
-	{
-		vk::Device dev;
-		vk::PhysicalDevice physDev;
-		vk::CommandPool cmdPool;
-		vk::Queue gfxQueue;
-	};
+struct GpuCtx {
+    vk::Device dev;
+    vk::PhysicalDevice physDev;
+    vk::CommandPool cmdPool;
+    vk::Queue gfxQueue;
+};
 } // namespace plt

@@ -1,84 +1,66 @@
-#pragma once 
+#pragma once
 #include <llgraphics/vulkan/utils.hpp>
+
 #include <vulkan/vulkan_structs.hpp>
 
-namespace plt 
-{
+namespace plt {
 
-	
-	class GpuMemory
-	{
+class GpuMemory {
 
-		vk::DeviceMemory _memory;
-		vk::Buffer _buffer;
+    vk::DeviceMemory _memory;
+    vk::Buffer _buffer;
 
-		GpuCtx _owner;
-		size_t _size;
-		public:
+    GpuCtx _owner;
+    size_t _size;
 
-		GpuMemory(GpuCtx owner, vk::DeviceMemory memory, vk::Buffer buffer, size_t size)
-		{
-			_owner = owner;
-			_memory = memory;
-			_buffer = buffer;
-			_size = size;
-		}
+public:
+    GpuMemory(GpuCtx owner, vk::DeviceMemory memory, vk::Buffer buffer, size_t size) {
+        _owner = owner;
+        _memory = memory;
+        _buffer = buffer;
+        _size = size;
+    }
 
-		GpuMemory()
-		{
-		}
+    GpuMemory() {
+    }
 
-		~GpuMemory()
-		{
-		}
+    ~GpuMemory() {
+    }
 
+    auto buffer() const {
+        return _buffer;
+    }
 
+    auto memory() const {
+        return _memory;
+    }
 
+    auto owner() const {
+        return _owner;
+    }
 
-		auto buffer() const
-		{
-			return _buffer;
-		}
+    auto size() const {
+        return _size;
+    }
 
-		auto memory() const
-		{
-			return _memory;
-		}
+    void *map() {
+        return _owner.dev.mapMemory(_memory, 0, _size);
+    }
 
-		auto owner() const
-		{
-			return _owner;
-		}
+    void unmap() {
+        _owner.dev.unmapMemory(_memory);
+    }
 
-		auto size() const
-		{
-			return _size;
-		}
+    auto deallocate() {
+        _owner.dev.destroyBuffer(_buffer);
+        _owner.dev.freeMemory(_memory);
 
+        _memory = nullptr;
+    };
 
-		void* map()
-		{
-			return _owner.dev.mapMemory(_memory, 0, _size);
-		}
+    static Result<GpuMemory> allocate(GpuCtx ctx, size_t size, vk::BufferUsageFlags usage = {}, vk::MemoryPropertyFlags properties = {});
 
-		void unmap()
-		{
-			_owner.dev.unmapMemory(_memory);
-		}
+    static Result<uint32_t> findMemoryType(GpuCtx ctx, uint32_t typeFilter, vk::MemoryPropertyFlags props);
+};
 
-		auto deallocate()
-		{
-			_owner.dev.destroyBuffer(_buffer);
-			_owner.dev.freeMemory(_memory);
-
-			_memory = nullptr;
-		};
-
-		static Result<GpuMemory> allocate(GpuCtx ctx, size_t size, vk::BufferUsageFlags usage = {},  vk::MemoryPropertyFlags properties = {});	
-
-		static Result<uint32_t> findMemoryType(GpuCtx ctx, uint32_t typeFilter, vk::MemoryPropertyFlags props);
-
-
-	};
-
-}
+} // namespace plt

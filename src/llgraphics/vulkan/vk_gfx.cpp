@@ -28,14 +28,14 @@ Result<> VkGfx::resizeSwapchain(Window *window) {
 }
 
 std::vector<NVertex> points = {
-	NVertex({0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}),
-	NVertex({0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}),
-	NVertex({-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}),
+    NVertex({0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}),
+    NVertex({0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}),
+    NVertex({-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}),
 };
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
-	this->mesh = plt::VkMesh<>();
+    this->mesh = plt::VkMesh<>();
     this->window = window;
     try$(setupSurface(window));
     try$(pickPhysicalDevice());
@@ -50,13 +50,12 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createCommandBuffers());
     try$(createSyncObjects());
 
-	this->mesh = plt::VkMesh<>(points.data(), points.size());
-	this->mesh.allocateGpuBuffers(this->ctx());
+    this->mesh = plt::VkMesh<>(points.data(), points.size());
+    this->mesh.allocateGpuBuffers(this->ctx());
 
-	this->deinit_funcs.push_back([](VkGfx* gfx) {
-			gfx->mesh.releaseGpuBuffers();
-			
-			});
+    this->deinit_funcs.push_back([](VkGfx *gfx) {
+        gfx->mesh.releaseGpuBuffers();
+    });
 
     return {};
 };

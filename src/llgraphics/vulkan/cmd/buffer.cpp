@@ -17,7 +17,6 @@ Result<> VkGfx::createCommandBuffers() {
 
 Result<> VkGfx::recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex) {
 
-
     target.start();
 
     {
@@ -33,11 +32,10 @@ Result<> VkGfx::recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex) {
         target->beginRenderPass(beginInfo, vk::SubpassContents::eInline);
 
         target->bindPipeline(vk::PipelineBindPoint::eGraphics, this->graphicPipeline);
-		
 
-		std::vector<vk::Buffer> bufs = {this->mesh.VertexBuffer()};
-		std::vector<vk::DeviceSize> offsets = {0};
-		target->bindVertexBuffers(0, 1, bufs.data(), offsets.data());
+        std::vector<vk::Buffer> bufs = {this->mesh.VertexBuffer()};
+        std::vector<vk::DeviceSize> offsets = {0};
+        target->bindVertexBuffers(0, 1, bufs.data(), offsets.data());
 
         auto viewport = vk::Viewport(0.0f, 0.0f, (float)this->swapchainExtent.width, (float)this->swapchainExtent.height, 0.0f, 1.0f);
         target->setViewport(0, 1, &viewport);

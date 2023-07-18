@@ -16,7 +16,6 @@
 #include "utils/traits.hpp"
 #include "window/window.hpp"
 
-
 namespace plt {
 
 class VkGfx : public NoCopy, public Gfx {
@@ -45,7 +44,7 @@ public:
 
     Result<> createRenderPass();
 
-    Result<> createGraphicPipeline(const VertexDescription&meshDescription);
+    Result<> createGraphicPipeline(VertexDescription const &meshDescription);
 
     Result<> createFramebuffers(bool recreated = false);
 
@@ -89,10 +88,9 @@ public:
 
     Result<bool> recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal = false);
 
-	GpuCtx ctx()
-	{
-		return {this->LogicalDevice, this->physicalDevice, this->commandPool, this->graphicsQueue};
-	}
+    GpuCtx ctx() {
+        return {this->LogicalDevice, this->physicalDevice, this->commandPool, this->graphicsQueue};
+    }
 
 private:
     bool invalidatedSwapchain = false;
@@ -163,9 +161,9 @@ private:
 
     size_t currentFrame = 0;
 
-	/* ---- mesh ---- */
+    /* ---- mesh ---- */
 
-	VkMesh<> mesh;
+    VkMesh<> mesh;
     /* ---- misc ---- */
     static constexpr std::array deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME};

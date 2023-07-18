@@ -1,112 +1,98 @@
-#pragma once 
+#pragma once
+#include <llgraphics/vulkan/mem/mem.hpp>
+#include <llgraphics/vulkan/mesh/vertex.hpp>
 #include <llgraphics/vulkan/utils.hpp>
 
-#include <llgraphics/vulkan/mesh/vertex.hpp>
-#include <llgraphics/vulkan/mem/mem.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
+
 #include "llgraphics/vulkan/cmd/buffer.hpp"
 
-namespace plt 
-{
-	
+namespace plt {
 
-	template<VertexType T=NVertex>
-	class VkMesh 
-	{
+template <VertexType T = NVertex>
+class VkMesh {
 
-		T *_vertices;
+    T *_vertices;
 
-		uint32_t *_indices;
+    uint32_t *_indices;
 
-		size_t _numVertices;
-		size_t _numIndices;
+    size_t _numVertices;
+    size_t _numIndices;
 
-		VertexDescription _description = T::description();
+    VertexDescription _description = T::description();
 
-		GpuMemory _vertexBuffer;
-		
-		public:
+    GpuMemory _vertexBuffer;
 
-		VkMesh()
-		{
-			_vertices = nullptr;
-			_indices = nullptr;
-			_description = T::description();
-		}
+public:
+    VkMesh() {
+        _vertices = nullptr;
+        _indices = nullptr;
+        _description = T::description();
+    }
 
-		VkMesh(T *vertices, uint32_t *indices, size_t numVertices, size_t numIndices)
-		{
-			this->_vertices = vertices;
-			this->_indices = indices;
-			this->_numVertices = numVertices;
-			this->_numIndices = numIndices;
-			_description = T::description();
-		}
+    VkMesh(T *vertices, uint32_t *indices, size_t numVertices, size_t numIndices) {
+        this->_vertices = vertices;
+        this->_indices = indices;
+        this->_numVertices = numVertices;
+        this->_numIndices = numIndices;
+        _description = T::description();
+    }
 
-		VkMesh(T *vertices, size_t numVertices)
-		{
-			this->_vertices = vertices;
-			this->_indices = nullptr;
-			this->_numVertices = numVertices;
-			this->_numIndices = 0;
-			_description = T::description();
-		}
+    VkMesh(T *vertices, size_t numVertices) {
+        this->_vertices = vertices;
+        this->_indices = nullptr;
+        this->_numVertices = numVertices;
+        this->_numIndices = 0;
+        _description = T::description();
+    }
 
-		Result<> allocateGpuBuffers(GpuCtx dev)
-		{
-			auto stagingBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
-			_vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
+    Result<> allocateGpuBuffers(GpuCtx dev) {
+        auto stagingBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent));
+        _vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
 
-			volatile auto mapped = (volatile T*)stagingBuffer.map();
-			memcpy((void*)mapped, _vertices, _numVertices * sizeof(T));
-			stagingBuffer.unmap();
+        auto volatile mapped = (T volatile *)stagingBuffer.map();
+        memcpy((void *)mapped, _vertices, _numVertices * sizeof(T));
+        stagingBuffer.unmap();
 
-			auto cmdBuffer = try$(VkCmdBuffer::create(dev.dev, dev.cmdPool));
+        auto cmdBuffer = try$(VkCmdBuffer::create(dev.dev, dev.cmdPool));
 
-			cmdBuffer.start(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-			{
-				cmdBuffer->copyBuffer(stagingBuffer.buffer(), _vertexBuffer.buffer(), vk::BufferCopy(0, 0, _numVertices * sizeof(T)));
-			}
-			cmdBuffer.end();
+        cmdBuffer.start(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        {
+            cmdBuffer->copyBuffer(stagingBuffer.buffer(), _vertexBuffer.buffer(), vk::BufferCopy(0, 0, _numVertices * sizeof(T)));
+        }
+        cmdBuffer.end();
 
-			dev.gfxQueue.submit(
-					vk::SubmitInfo()
-						.setCommandBufferCount(1)
-						.setPCommandBuffers(&cmdBuffer.buf()), 
-					vk::Fence());
-			dev.gfxQueue.waitIdle();
+        dev.gfxQueue.submit(
+            vk::SubmitInfo()
+                .setCommandBufferCount(1)
+                .setPCommandBuffers(&cmdBuffer.buf()),
+            vk::Fence());
+        dev.gfxQueue.waitIdle();
 
-			cmdBuffer.release();
+        cmdBuffer.release();
 
-			return {};
-		}
+        stagingBuffer.deallocate();
 
-		void releaseGpuBuffers()
-		{
+        return {};
+    }
 
-			_vertexBuffer.deallocate();
-		}
+    void releaseGpuBuffers() {
 
-		auto description() const
-		{
-			return _description;
-		}
+        _vertexBuffer.deallocate();
+    }
 
-		auto VertexBuffer()
-		{
-			return _vertexBuffer.buffer();
-		}
+    auto description() const {
+        return _description;
+    }
 
-		auto verticesCount()
-		{
-			return _numVertices;
-		}
+    auto VertexBuffer() {
+        return _vertexBuffer.buffer();
+    }
 
+    auto verticesCount() {
+        return _numVertices;
+    }
+};
 
-		
-
-
-	};
-
-}
+} // namespace plt

@@ -5,12 +5,12 @@
 #include <vulkan/vulkan_structs.hpp>
 namespace plt {
 
-Result<> VkGfx::createGraphicPipeline(const VertexDescription &description) {
+Result<> VkGfx::createGraphicPipeline(VertexDescription const &description) {
 
     debug$("creating graphic pipeline layout...");
 
-	info$("with vertex description:");
-	description.dump();
+    info$("with vertex description:");
+    description.dump();
     std::vector<vk::DynamicState> dynamic_states = {
         vk::DynamicState::eViewport,
         vk::DynamicState::eScissor};
@@ -20,8 +20,8 @@ Result<> VkGfx::createGraphicPipeline(const VertexDescription &description) {
 
     // describing how the vertex are in memory and how they are passed to the vertex shader
 
-	auto bindingDesc = description.binding;
-	auto attributeDesc = description.attributes;
+    auto bindingDesc = description.binding;
+    auto attributeDesc = description.attributes;
 
     auto vertex_input_info = vk::PipelineVertexInputStateCreateInfo()
                                  .setVertexBindingDescriptions(bindingDesc)

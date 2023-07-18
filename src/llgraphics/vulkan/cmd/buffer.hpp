@@ -10,12 +10,12 @@ namespace plt {
 class VkCmdBuffer : public NoCopy {
 
     vk::CommandBuffer buffer;
-	vk::Device dev;
-	vk::CommandPool pool;
+    vk::Device dev;
+    vk::CommandPool pool;
+
 public:
     VkCmdBuffer() = default;
-	VkCmdBuffer(vk::CommandBuffer buffer, vk::Device dev, vk::CommandPool pool) : buffer(buffer), dev(dev), pool(pool) {}
-
+    VkCmdBuffer(vk::CommandBuffer buffer, vk::Device dev, vk::CommandPool pool) : buffer(buffer), dev(dev), pool(pool) {}
 
     vk::CommandBuffer *operator->() {
         return &this->buffer;
@@ -25,10 +25,9 @@ public:
         return this->buffer;
     }
 
-	void release()
-	{
-		dev.freeCommandBuffers(pool, buffer);
-	}
+    void release() {
+        dev.freeCommandBuffers(pool, buffer);
+    }
 
     static Result<VkCmdBuffer> create(
         vk::Device device,
@@ -42,9 +41,9 @@ public:
                              .setCommandBufferCount(1);
 
         vkTry$(device.allocateCommandBuffers(&allocInfo, &buffer.buffer));
-	
-		buffer.dev = device;
-		buffer.pool = pool;
+
+        buffer.dev = device;
+        buffer.pool = pool;
 
         return std::move(buffer);
     }
@@ -68,8 +67,6 @@ public:
         for (auto &buffer : buffers) {
             cmd_buffers.push_back(VkCmdBuffer(buffer, device, pool));
         }
-
-		
 
         return std::move(cmd_buffers);
     }
