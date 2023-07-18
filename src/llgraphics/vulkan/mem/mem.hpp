@@ -10,7 +10,7 @@ namespace plt {
 
 class GpuMemory {
 
-    vk::DeviceMemory _memory;
+    vk::DeviceMemory _memory = nullptr;
     vk::Buffer _buffer;
 
     GpuCtx _owner;
@@ -25,6 +25,7 @@ public:
     }
 
     GpuMemory() {
+        _memory = nullptr;
     }
 
     ~GpuMemory() {
@@ -52,6 +53,10 @@ public:
 
     void unmap() {
         _owner.dev.unmapMemory(_memory);
+    }
+
+    bool valid() const {
+        return _memory != nullptr;
     }
 
     static Result<GpuMemory> allocate(GpuCtx ctx, size_t size, vk::BufferUsageFlags usage = {}, vk::MemoryPropertyFlags properties = {});

@@ -28,10 +28,14 @@ Result<> VkGfx::resizeSwapchain(Window *window) {
 }
 
 std::vector<NVertex> points = {
-    NVertex({0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}),
-    NVertex({0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}),
-    NVertex({-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}),
+    NVertex({-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}),
+    NVertex({0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}),
+    NVertex({0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}),
+    NVertex({-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}),
 };
+
+std::vector<uint32_t> indices = {
+    0, 1, 2, 2, 3, 0};
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
@@ -50,7 +54,7 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createCommandBuffers());
     try$(createSyncObjects());
 
-    this->mesh = plt::VkMesh<>(points.data(), points.size());
+    this->mesh = plt::VkMesh<>(points.data(), indices.data(), points.size(), indices.size());
     this->mesh.allocateGpuBuffers(this->ctx());
 
     this->deinit_funcs.push_back([](VkGfx *gfx) {

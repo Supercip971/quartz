@@ -36,6 +36,7 @@ Result<> VkGfx::recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex) {
         std::vector<vk::Buffer> bufs = {this->mesh.VertexBuffer()};
         std::vector<vk::DeviceSize> offsets = {0};
         target->bindVertexBuffers(0, 1, bufs.data(), offsets.data());
+        target->bindIndexBuffer(this->mesh.indexBuffer(), 0, vk::IndexType::eUint32);
 
         auto viewport = vk::Viewport(0.0f, 0.0f, (float)this->swapchainExtent.width, (float)this->swapchainExtent.height, 0.0f, 1.0f);
         target->setViewport(0, 1, &viewport);
@@ -43,7 +44,7 @@ Result<> VkGfx::recordRenderCommands(VkCmdBuffer &target, uint32_t imageIndex) {
 
         target->setScissor(0, 1, &scissor);
 
-        target->draw(this->mesh.verticesCount(), 1, 0, 0);
+        target->drawIndexed(this->mesh.indicesCount(), 1, 0, 0, 0);
 
         target->endRenderPass();
     }

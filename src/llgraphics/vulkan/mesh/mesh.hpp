@@ -23,6 +23,7 @@ class VkMesh {
     VertexDescription _description = T::description();
 
     GpuMemory _vertexBuffer;
+    GpuMemory _indexBuffer;
 
 public:
     VkMesh() {
@@ -52,12 +53,21 @@ public:
 
         try$(_vertexBuffer.stagedCopy(_vertices, _numVertices * sizeof(T)));
 
+        if (_indices != nullptr) {
+            _indexBuffer = try$(GpuMemory::allocate(dev, _numIndices * sizeof(uint32_t), vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
+            try$(_indexBuffer.stagedCopy(_indices, _numIndices * sizeof(uint32_t)));
+        }
         return {};
     }
 
     void releaseGpuBuffers() {
 
         _vertexBuffer.deallocate();
+
+        if (_indices != nullptr) {
+            _indexBuffer.deallocate();
+            _indexBuffer = {};
+        }
     }
 
     auto description() const {
@@ -70,6 +80,14 @@ public:
 
     auto verticesCount() {
         return _numVertices;
+    }
+
+    auto indexBuffer() {
+        return _indexBuffer.buffer();
+    }
+
+    auto indicesCount() {
+        return _numIndices;
     }
 };
 
