@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_structs.hpp>
 
 #include "llgraphics/vulkan/cmd/buffer.hpp"
+#include "llgraphics/vulkan/mem/allocator.hpp"
 #include "llgraphics/vulkan/mesh/mesh.hpp"
 #include "llgraphics/vulkan/mesh/vertex.hpp"
 #include "utils/log.hpp"
@@ -36,6 +37,15 @@ std::vector<NVertex> points = {
 
 std::vector<uint32_t> indices = {
     0, 1, 2, 2, 3, 0};
+
+
+struct RenderUniform 
+{
+	float time; 
+	float aspect_ratio;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
 Result<> VkGfx::attachVulkan(Window *window) {
     info$("attaching vulkan to window");
 
@@ -48,14 +58,19 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createImageViews());
     try$(createShaderPipeline());
     try$(createRenderPass());
+	try$(createDescriptorSetLayout());
     try$(createGraphicPipeline(this->mesh.description()));
     try$(createFramebuffers());
     try$(createCommandPool());
     try$(createCommandBuffers());
     try$(createSyncObjects());
 
-    this->mesh = plt::VkMesh<>(points.data(), indices.data(), points.size(), indices.size());
-    this->mesh.allocateGpuBuffers(this->ctx());
+   	MemoryManager::the().initialize(this->ctx());
+	
+	MemoryManager::the().set_in_flight_frames(this->MAX_FRAMES_IN_FLIGHT);
+
+    this->mesh = VkMesh<>(points.data(), indices.data(), points.size(), indices.size(), sizeof(RenderUniform));
+    try$(this->mesh.allocateGpuBuffers(this->ctx()));
 
     this->deinit_funcs.push_back([](VkGfx *gfx) {
         gfx->mesh.releaseGpuBuffers();

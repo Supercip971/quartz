@@ -99,8 +99,7 @@ Result<> VkGfx::createGraphicPipeline(VertexDescription const &description) {
     // describing the pipeline layout
 
     auto pipeline_layout_info = vk::PipelineLayoutCreateInfo()
-                                    .setSetLayoutCount(0)
-                                    .setPSetLayouts(nullptr)
+                                    .setSetLayouts(this->descriptorSetLayout)
                                     .setPushConstantRangeCount(0)
                                     .setPPushConstantRanges(nullptr);
     vkTry$(this->LogicalDevice.createPipelineLayout(&pipeline_layout_info, nullptr, &this->pipelineLayout));

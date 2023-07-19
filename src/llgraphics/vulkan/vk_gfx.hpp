@@ -43,6 +43,8 @@ public:
     Result<> createShaderPipeline();
 
     Result<> createRenderPass();
+	
+	Result<> createDescriptorSetLayout();
 
     Result<> createGraphicPipeline(VertexDescription const &meshDescription);
 
@@ -89,7 +91,7 @@ public:
     Result<bool> recreateSwapchainIfNecessary(vk::Result res, bool noSuboptimal = false);
 
     GpuCtx ctx() {
-        return {this->LogicalDevice, this->physicalDevice, this->commandPool, this->graphicsQueue};
+        return {this->LogicalDevice, this->physicalDevice, this->instance, this->commandPool, this->graphicsQueue, this->MAX_FRAMES_IN_FLIGHT};
     }
 
 private:
@@ -133,6 +135,8 @@ private:
 
     // render pass - framebuffer attachment
     vk::RenderPass renderPass;
+
+	vk::DescriptorSetLayout descriptorSetLayout;
     vk::PipelineLayout pipelineLayout;
     vk::Pipeline graphicPipeline;
 

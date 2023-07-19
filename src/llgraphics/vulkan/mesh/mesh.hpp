@@ -1,12 +1,16 @@
 #pragma once
+#include <cstdint>
 #include <llgraphics/vulkan/mem/mem.hpp>
 #include <llgraphics/vulkan/mesh/vertex.hpp>
 #include <llgraphics/vulkan/utils.hpp>
 
+#include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 #include "llgraphics/vulkan/cmd/buffer.hpp"
+#include "llgraphics/vulkan/mem/allocator.hpp"
+#include "llgraphics/vulkan/pipeline/uniforms.hpp"
 
 namespace plt {
 
@@ -24,6 +28,10 @@ class VkMesh {
 
     GpuMemory _vertexBuffer;
     GpuMemory _indexBuffer;
+	GpuMemory _uniforms;
+
+	size_t _uniform_size;
+	void* _mapped_uniform;
 
 public:
     VkMesh() {
@@ -32,11 +40,12 @@ public:
         _description = T::description();
     }
 
-    VkMesh(T *vertices, uint32_t *indices, size_t numVertices, size_t numIndices) {
+    VkMesh(T *vertices, uint32_t *indices, size_t numVertices, size_t numIndices, size_t uniform_size) {
         this->_vertices = vertices;
         this->_indices = indices;
         this->_numVertices = numVertices;
         this->_numIndices = numIndices;
+		this->_uniform_size = uniform_size;
         _description = T::description();
     }
 
@@ -48,26 +57,63 @@ public:
         _description = T::description();
     }
 
-    Result<> allocateGpuBuffers(GpuCtx dev) {
-        _vertexBuffer = try$(GpuMemory::allocate(dev, _numVertices * sizeof(T), vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
+	template<typename N>
+	N* mapped_uniform() {
+		return _mapped_uniform;
+	}
 
+	template<typename N>
+	void mapped_uniform(N& val) {
+		*((N*)_mapped_uniform) = val;
+	}
+
+    Result<> allocateGpuBuffers(GpuCtx dev) {
+
+		warn$("use the same buffer for staging, index and vertex buffer");
+
+
+		try$(MemoryManager::the().grouped()
+			.allocate(BUF_USAGE_TRANSFER_DST | BUF_USAGE_VERTEX_BUFFER,(size_t)(_numVertices * sizeof(T)), vk::MemoryPropertyFlagBits::eDeviceLocal, &_vertexBuffer)
+			.allocate(BUF_USAGE_TRANSFER_DST | BUF_USAGE_INDEX_BUFFER,(size_t)(_numIndices * sizeof(uint32_t)), vk::MemoryPropertyFlagBits::eDeviceLocal, &_indexBuffer)
+			.allocate(BUF_USAGE_UNIFORM_BUFFER | BUF_USAGE_DYNAMIC | BUF_USAGE_CPU_USABLE, _uniform_size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, &_uniforms)
+			.execute());
+
+		(void)(dev);
+
+
+		info$("a");
         try$(_vertexBuffer.stagedCopy(_vertices, _numVertices * sizeof(T)));
 
         if (_indices != nullptr) {
-            _indexBuffer = try$(GpuMemory::allocate(dev, _numIndices * sizeof(uint32_t), vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal));
+
+		info$("b");
+
             try$(_indexBuffer.stagedCopy(_indices, _numIndices * sizeof(uint32_t)));
         }
+		info$("c");
+
+
+		try$(_uniforms.map_frame());
+
         return {};
     }
 
+
+	void *getUniform()
+	{
+
+		return _uniforms.get_current_frame_mapping().unwrap();
+	}
+
     void releaseGpuBuffers() {
 
-        _vertexBuffer.deallocate();
+		MemoryManager::the().release(_vertexBuffer);
 
-        if (_indices != nullptr) {
-            _indexBuffer.deallocate();
-            _indexBuffer = {};
-        }
+		MemoryManager::the().release(_indexBuffer);
+
+		_uniforms.unmap_frame();
+		MemoryManager::the().release(_uniforms);
+
     }
 
     auto description() const {
@@ -75,7 +121,7 @@ public:
     }
 
     auto VertexBuffer() {
-        return _vertexBuffer.buffer();
+        return _vertexBuffer.buffer().unwrap();
     }
 
     auto verticesCount() {
@@ -83,7 +129,7 @@ public:
     }
 
     auto indexBuffer() {
-        return _indexBuffer.buffer();
+        return _indexBuffer.buffer().unwrap();
     }
 
     auto indicesCount() {

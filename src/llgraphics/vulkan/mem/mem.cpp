@@ -7,6 +7,8 @@
 
 namespace plt {
 
+	/*
+
 Result<uint32_t> GpuMemory::findMemoryType(GpuCtx ctx, uint32_t typeFilter, vk::MemoryPropertyFlags props) {
 
     auto memProperties = ctx.physDev.getMemoryProperties();
@@ -39,6 +41,6 @@ Result<GpuMemory> GpuMemory::allocate(GpuCtx ctx, size_t size, vk::BufferUsageFl
     ctx.dev.bindBufferMemory(buffer, memory, 0);
 
     return GpuMemory(ctx, memory, buffer, size);
-}
+}*/
 
 } // namespace plt
