@@ -149,6 +149,11 @@ namespace plt
 
 	}
 
+	void MemoryManager::uninitialize()
+	{
+		info$("Uninitializing MemoryManager");
+		vmaDestroyAllocator(_allocator);
+	}
 
 	void MemoryManager::release(GpuMemory& mem)
 	{

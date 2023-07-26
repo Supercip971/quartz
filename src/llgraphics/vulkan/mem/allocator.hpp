@@ -94,6 +94,8 @@ namespace plt
 
 		Result<> initialize(GpuCtx ctx);
 
+		void uninitialize();
+
 		void start_new_frame(uint32_t frame_id);
 		void set_in_flight_frames(uint32_t in_flight_frames){ _in_flight_frames = in_flight_frames; }
 

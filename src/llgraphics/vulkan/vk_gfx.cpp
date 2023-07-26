@@ -66,6 +66,11 @@ Result<> VkGfx::attachVulkan(Window *window) {
     try$(createSyncObjects());
 
    	MemoryManager::the().initialize(this->ctx());
+
+	this->deinit_funcs.push_back([](VkGfx *gfx) {
+			(void)gfx;
+		MemoryManager::the().uninitialize();
+	});
 	
 	MemoryManager::the().set_in_flight_frames(this->MAX_FRAMES_IN_FLIGHT);
 
